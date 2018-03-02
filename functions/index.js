@@ -3,6 +3,7 @@ const functions = require('firebase-functions');
 const createUser = require('./create_user');
 const serviceAccount = require('./config/service_account.json');
 const requestCode = require('./request_code');
+const requestCodeTest = require('./request_code_test');
 const verifyCode = require('./verify_code');
 
 admin.initializeApp({
@@ -12,4 +13,5 @@ admin.initializeApp({
 
 exports.createUser = functions.https.onRequest(createUser);
 exports.requestCode = functions.https.onRequest(requestCode);
+exports.requestCodeTest = functions.https.onRequest(requestCodeTest);
 exports.verifyCode = functions.https.onRequest(verifyCode);

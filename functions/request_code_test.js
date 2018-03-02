@@ -1,5 +1,4 @@
 const admin = require('firebase-admin');
-const twilio = require('./config/twilio');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber) {
@@ -14,22 +13,15 @@ module.exports = function (req, res) {
 
             // number between 1000 and 9999
             const code = Math.floor((Math.random() * 8999 + 1000));
+            const db = admin.firestore();
 
-            twilio.messages.create({
-                body: 'Your code is ' + code,
-                to: '+45' + phoneNumber,
-                from: 'BudgetBud'
-            }, (err) => {
-                if (err) { return res.status(422).send(err); }
-
-                const db = admin.firestore();
-
-                db.collection("users").doc(cprNumber).set({
-                    phoneNumber: phoneNumber,
-                    code: code
-                })
-                    .then(function () { res.send({success: true}); });
-            });
+            db.collection("users").doc(cprNumber).set({
+                phoneNumber: phoneNumber,
+                code: code
+            })
+                .then(function () {
+                    res.send({success: true});
+                });
         })
         .catch((err) => {
             res.status(422).send({error: err});
