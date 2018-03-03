@@ -2,8 +2,8 @@ const admin = require('firebase-admin');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.code) {
-        return res.status(422).send({error: 'CPR-nummer og pinkode skal angives.'});
-    }
+        return res.status(411).send({error: 'Forkert indtastning.'});
+    } //CPR-nummer/pinkode mangler.
 
     const cprNumber = String(req.body.cprNumber);
     const code = parseInt(req.body.code);
@@ -15,7 +15,7 @@ module.exports = function (req, res) {
 
             ref.get().then(function (doc) {
                 if (!doc.exists)
-                    return res.status(422).send({error: 'Bruger ikke fundet.'});
+                    return res.status(422).send({error: 'Bruger er ikke fundet.'});
 
                 const user = doc.data();
 
@@ -29,5 +29,5 @@ module.exports = function (req, res) {
                     .catch()
             });
         })
-        .catch(err => res.status(422).send({error: err}))
+        .catch(err => res.status(422).send({error: 'Ukendt fejl opstod.'}))
 };

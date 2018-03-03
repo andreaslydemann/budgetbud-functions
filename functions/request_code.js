@@ -3,7 +3,7 @@ const twilio = require('./config/twilio');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber) {
-        return res.status(422).send({error: 'Cpr-nummer og telefonnummer skal angives.'});
+        return res.status(422).send({error: 'Forkert indtastning.'});
     }
 
     const cprNumber = String(req.body.cprNumber);
@@ -32,6 +32,6 @@ module.exports = function (req, res) {
             });
         })
         .catch((err) => {
-            res.status(422).send({error: err});
+            res.status(422).send({error: 'Ukendt fejl opstod.'});
         });
 };

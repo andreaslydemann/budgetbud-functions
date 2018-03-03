@@ -13,5 +13,5 @@ module.exports = function (req, res) {
     // Respond to the user request, saying the account was made
     admin.auth().createUser({uid: cprNumber})
         .then(user => res.send(user))
-        .catch(err => res.status(422).send({error: err}));
+        .catch(err => res.status(422).send({error: 'Bruger findes allerede.'}));
 };
