@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.code) {
         return res.status(411).send({error: 'Forkert indtastning.'});
-    } //CPR-nummer/pinkode mangler.
+    }
 
     const cprNumber = String(req.body.cprNumber);
     const code = parseInt(req.body.code);
