@@ -14,7 +14,9 @@ module.exports = function (req, res) {
             db.collection("users").doc(cprNumber).delete()
                 .then(() => {
                     res.status(200).send({success: true});
-                });
+                })
+                .catch(err => res.status(422)
+                    .send({error: 'Bruger blev slettet, men tilknyttet data blev ikke.'}));
         })
-        .catch(err => res.status(422).send({error: 'Ukendt fejl opstod.'}));
+        .catch(err => res.status(422).send({error: 'Sletning af bruger fejlede.'}));
 };
