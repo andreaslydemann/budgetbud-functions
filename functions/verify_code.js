@@ -16,7 +16,7 @@ module.exports = function (req, res) {
             ref.get()
                 .then((doc) => {
                     if (!doc.exists)
-                        return res.status(400).send({error: 'Bruger er ikke fundet.'});
+                        return res.status(400).send({error: 'Bruger er ikke registreret.'});
 
                     const user = doc.data();
 
@@ -29,5 +29,5 @@ module.exports = function (req, res) {
                         .then(token => res.send({token: token}))
                 });
         })
-        .catch(err => res.status(422).send({error: 'Ukendt fejl opstod.'}));
+        .catch(err => res.status(422).send({error: 'Bruger er ikke registreret.'}));
 };
