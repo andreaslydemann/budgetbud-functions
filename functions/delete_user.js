@@ -1,21 +1,20 @@
 const admin = require('firebase-admin');
 
 module.exports = function (req, res) {
-    if (!req.body.token) {
-        return res.status(411).send({error: 'Token ikke modtaget.'});
+    if (!req.body.cprNumber) {
+        return res.status(400).send({error: 'CPR-nummer ikke modtaget.'});
     }
 
-    admin.auth().verifyIdToken(req.body.token)
-        .then((decodedToken) => {
-            const uid = decodedToken.uid;
+    const cprNumber = String(req.body.cprNumber);
 
-            admin.auth().deleteUser(uid)
+    admin.auth().deleteUser(cprNumber)
+        .then(() => {
+            const db = admin.firestore();
+
+            db.collection("users").doc(cprNumber).delete()
                 .then(() => {
-                    const db = admin.firestore();
-                    const ref = db.collection("users").doc(uid);
-
-                    ref.remove().then(() => {res.status(200).send()});
-                })
-                .catch(err => res.status(422).send({error: 'Sletning fejlede.'}));
-        }).catch(err => res.status(422).send({error: 'Token kunne ikke verificeres.'}));
+                    res.status(200).send({success: true});
+                });
+        })
+        .catch(err => res.status(422).send({error: 'Ukendt fejl opstod.'}));
 };

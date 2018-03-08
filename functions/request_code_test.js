@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber) {
-        return res.status(422).send({error: 'Cpr-nummer og telefonnummer skal angives.'});
+        return res.status(400).send({error: 'Cpr-nummer og telefonnummer skal angives.'});
     }
 
     const cprNumber = String(req.body.cprNumber);
@@ -19,11 +19,9 @@ module.exports = function (req, res) {
                 phoneNumber: phoneNumber,
                 code: code
             })
-                .then(function () {
+                .then(() => {
                     res.send({success: true});
                 });
         })
-        .catch((err) => {
-            res.status(422).send({error: err});
-        });
+        .catch(err => res.status(422).send({error: 'Ukendt fejl opstod.'}));
 };

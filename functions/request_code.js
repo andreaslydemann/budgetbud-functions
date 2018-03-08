@@ -3,7 +3,7 @@ const twilio = require('./config/twilio');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber) {
-        return res.status(422).send({error: 'Forkert indtastning.'});
+        return res.status(400).send({error: 'Forkert indtastning.'});
     }
 
     const cprNumber = String(req.body.cprNumber);
@@ -20,7 +20,7 @@ module.exports = function (req, res) {
                 to: '+45' + phoneNumber,
                 from: 'BudgetBud'
             }, (err) => {
-                if (err) { return res.status(422).send(err); }
+                if (err) { return res.status(400).send(err); }
 
                 const db = admin.firestore();
 
@@ -28,10 +28,8 @@ module.exports = function (req, res) {
                     phoneNumber: phoneNumber,
                     code: code
                 })
-                    .then(function () { res.send({success: true}); });
+                    .then(() => { res.send({success: true}); });
             });
         })
-        .catch((err) => {
-            res.status(422).send({error: 'Ukendt fejl opstod.'});
-        });
+        .catch(err => res.status(422).send({error: 'Ukendt fejl opstod.'}));
 };
