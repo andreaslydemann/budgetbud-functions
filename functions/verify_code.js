@@ -1,11 +1,12 @@
 const admin = require('firebase-admin');
+const crypto = require('crypto');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.code)
         return res.status(400).send({error: 'Forkert indtastning.'});
 
     const cprNumber = String(req.body.cprNumber);
-    const code = parseInt(req.body.code);
+    const code = String(req.body.code);
 
     admin.auth().getUser(cprNumber)
         .then((user) => {
@@ -20,7 +21,10 @@ module.exports = function (req, res) {
                     if (!doc.exists)
                         return res.status(400).send({error: 'Bruger er ikke registreret.'});
 
-                    if (doc.data().code !== code) {
+                    const hash = crypto.pbkdf2Sync(code, doc.data().codeSalt,
+                        10000, 128, 'sha512').toString('hex');
+
+                    if (doc.data().codeHash !== hash) {
                         ref.get().then(doc => {
                             const failedSignIns = doc.data().failedSignIns + 1;
 
