@@ -26,7 +26,8 @@ module.exports = function (req, res) {
 
                 db.collection("users").doc(cprNumber).set({
                     phoneNumber: phoneNumber,
-                    code: code
+                    code: code,
+                    failedSignIns: 0
                 })
                     .then(() => { res.send({success: true}); });
             });

@@ -9,7 +9,10 @@ module.exports = function (req, res) {
     const code = parseInt(req.body.code);
 
     admin.auth().getUser(cprNumber)
-        .then(() => {
+        .then((user) => {
+            if (user.disabled === true)
+                return res.status(400).send({error: 'Bruger er deaktiveret.'});
+
             const db = admin.firestore();
             const ref = db.collection("users").doc(cprNumber);
 
@@ -21,9 +24,22 @@ module.exports = function (req, res) {
                     const user = doc.data();
 
                     if (user.code !== code) {
-                        //ref.update({codeValid: false});
+                        ref.get().then(doc => {
+                            const failedSignIns = doc.data().failedSignIns + 1;
+
+                            if (failedSignIns >= 3) {
+                                admin.auth().updateUser(cprNumber, {
+                                    disabled: true
+                                });
+                            }
+
+                            ref.update({failedSignIns});
+                        });
+
                         return res.status(400).send({error: 'Pinkode er forkert.'});
                     }
+
+                    ref.update({failedSignIns: 0});
 
                     admin.auth().createCustomToken(cprNumber)
                         .then(token => res.send({token: token}))
