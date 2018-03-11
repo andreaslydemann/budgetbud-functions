@@ -1,9 +1,8 @@
 const admin = require('firebase-admin');
 
 module.exports = function (req, res) {
-    if (!req.body.cprNumber || !req.body.code) {
+    if (!req.body.cprNumber || !req.body.code)
         return res.status(400).send({error: 'Forkert indtastning.'});
-    }
 
     const cprNumber = String(req.body.cprNumber);
     const code = parseInt(req.body.code);
@@ -21,9 +20,7 @@ module.exports = function (req, res) {
                     if (!doc.exists)
                         return res.status(400).send({error: 'Bruger er ikke registreret.'});
 
-                    const user = doc.data();
-
-                    if (user.code !== code) {
+                    if (doc.data().code !== code) {
                         ref.get().then(doc => {
                             const failedSignIns = doc.data().failedSignIns + 1;
 

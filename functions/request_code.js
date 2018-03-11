@@ -2,9 +2,8 @@ const admin = require('firebase-admin');
 const twilio = require('./config/twilio');
 
 module.exports = function (req, res) {
-    if (!req.body.cprNumber || !req.body.phoneNumber) {
+    if (!req.body.cprNumber || !req.body.phoneNumber)
         return res.status(400).send({error: 'Forkert indtastning.'});
-    }
 
     const cprNumber = String(req.body.cprNumber);
     const phoneNumber = parseInt(req.body.phoneNumber);

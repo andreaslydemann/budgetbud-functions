@@ -1,9 +1,8 @@
 const admin = require('firebase-admin');
 
 module.exports = function (req, res) {
-    if (!req.body.cprNumber || !req.body.phoneNumber) {
+    if (!req.body.cprNumber || !req.body.phoneNumber)
         return res.status(400).send({error: 'Cpr-nummer og telefonnummer skal angives.'});
-    }
 
     const cprNumber = String(req.body.cprNumber);
     const phoneNumber = parseInt(req.body.phoneNumber);
