@@ -5,6 +5,7 @@ const createUser = require('./create_user');
 const deleteUser = require('./delete_user');
 const requestCode = require('./request_code');
 const verifyCode = require('./verify_code');
+const createBudget = require('./create_budget');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -15,3 +16,4 @@ exports.createUser = functions.https.onRequest(createUser);
 exports.deleteUser = functions.https.onRequest(deleteUser);
 exports.requestCode = functions.https.onRequest(requestCode);
 exports.verifyCode = functions.https.onRequest(verifyCode);
+exports.createBudget = functions.https.onRequest(createBudget);
