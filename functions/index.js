@@ -5,7 +5,11 @@ const createUser = require('./create_user');
 const deleteUser = require('./delete_user');
 const requestCode = require('./request_code');
 const verifyCode = require('./verify_code');
-const createBudget = require('./create_budget');
+const createBudget = require('./create_budgets');
+const createCategories = require('./create_categories');
+const editBudget = require('./edit_budgets');
+const getBudget = require('./get_budgets');
+const getCategories = require('./get_categories');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -17,3 +21,7 @@ exports.deleteUser = functions.https.onRequest(deleteUser);
 exports.requestCode = functions.https.onRequest(requestCode);
 exports.verifyCode = functions.https.onRequest(verifyCode);
 exports.createBudget = functions.https.onRequest(createBudget);
+exports.createCategories = functions.https.onRequest(createCategories);
+exports.editBudget = functions.https.onRequest(editBudget);
+exports.getBudget = functions.https.onRequest(getBudget);
+exports.getCategories = functions.https.onRequest(getCategories);
