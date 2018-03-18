@@ -10,6 +10,7 @@ const createCategories = require('./create_categories');
 const editBudget = require('./edit_budgets');
 const getBudget = require('./get_budgets');
 const getCategories = require('./get_categories');
+const getDebts = require('./get_debts');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -25,3 +26,4 @@ exports.createCategories = functions.https.onRequest(createCategories);
 exports.editBudget = functions.https.onRequest(editBudget);
 exports.getBudget = functions.https.onRequest(getBudget);
 exports.getCategories = functions.https.onRequest(getCategories);
+exports.getDebts = functions.https.onRequest(getDebts);
