@@ -32,26 +32,28 @@ module.exports = function (req, res) {
                 })
                     .then(() => {
                         const categories = req.body.categories;
-                        const amountPerCategory = totalAmount / categories.length;
+                        const amountPerCategory = Math.round(totalAmount / categories.length);
 
-                        for (let i = 0; i < categories.length; i++) {
-                            let categoryID = String(categories[i]);
+                        db.collection("categoryDebt").where("debtID", "==", debtID)
+                            .get()
+                            .then(function (querySnapshot) {
+                                querySnapshot.forEach(function (doc) {
+                                    doc.ref.delete();
+                                });
 
-                            console.log("debtID: " + debtID);
-                            console.log("categoryID: " + categoryID);
-                            console.log("amountPerCategory: " + amountPerCategory);
+                                for (let i = 0; i < categories.length; i++) {
+                                    let categoryID = String(categories[i]);
 
-                            const colRef = db.collection('categoryDebt').where("debtID", "==", debtID)
-
-                            colRef.update({
-                                debtID: debtID,
-                                categoryID: categoryID,
-                                amount: amountPerCategory
+                                    db.collection('categoryDebt').doc().set({
+                                        debtID: debtID,
+                                        categoryID: categoryID,
+                                        amount: amountPerCategory
+                                    })
+                                        .then(() => res.status(200).send({success: true}))
+                                        .catch(err => res.status(422)
+                                            .send({error: 'Fejl opstod under gældsændringen.'}));
+                                }
                             })
-                                .then(() => res.status(200).send({success: true}))
-                                .catch(err => res.status(422)
-                                    .send({error: 'Fejl opstod under gældsændringen.'}));
-                        }
                     })
                     .catch(err => res.status(422).send({error: 'Kunne ikke ændre gæld.'}));
             })

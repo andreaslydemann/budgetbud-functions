@@ -33,7 +33,7 @@ module.exports = function (req, res) {
                     .then(() => {
                         const debtID = docRef.id;
                         const categories = req.body.categories;
-                        const amountPerCategory = totalAmount / categories.length;
+                        const amountPerCategory = Math.round(totalAmount / categories.length);
 
                         for (let i = 0; i < categories.length; i++) {
                             let categoryID = String(categories[i]);
