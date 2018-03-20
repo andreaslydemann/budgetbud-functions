@@ -5,10 +5,10 @@ const createUser = require('./create_user');
 const deleteUser = require('./delete_user');
 const requestCode = require('./request_code');
 const verifyCode = require('./verify_code');
-const createBudget = require('./create_budgets');
+const createBudget = require('./create_budget');
 const createCategories = require('./create_categories');
-const editBudget = require('./edit_budgets');
-const getBudget = require('./get_budgets');
+const editBudget = require('./edit_budget');
+const getBudget = require('./get_budget');
 const getCategories = require('./get_categories');
 const getDebts = require('./get_debts');
 
