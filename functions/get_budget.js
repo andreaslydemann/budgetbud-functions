@@ -7,13 +7,13 @@ module.exports = function (req, res) {
         admin.auth().verifyIdToken(token)
             .then(() => {
                 const db = admin.firestore();
-                // const userID = String(req.body.userID);
-                const userID = String(req.body.userID);
+                const userID = String(req.query.userID);
+
                 db.collection("budgets").where("userID", "==", userID)
                     .get()
                     .then(function(querySnapshot) {
                         querySnapshot.forEach(function(doc) {
-                            res.status(200).send(doc.data())
+                            res.status(200).send({id: doc.id, data: doc.data()})
                                 .catch(err => res.status(422)
                                     .send({error: 'Hentning af et budget dokument fejlede.'}));
                         });
