@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
+const dateHelper = require('./helpers/date_helper');
 
 module.exports = function (req, res) {
     cors(req, res, () => {
@@ -9,7 +10,7 @@ module.exports = function (req, res) {
                 if (!req.body.name || !req.body.totalAmount || !req.body.budgetID)
                     return res.status(422).send({error: 'Fejl i indtastning.'});
 
-                if (!req.body.expirationDate || Date.now() >= new Date(req.body.expirationDate))
+                if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
                     return res.status(422).send({error: 'Ugyldig udløbsdato.'});
 
                 if (!req.body.categories || req.body.categories.length === 0)
@@ -18,30 +19,34 @@ module.exports = function (req, res) {
                 const name = String(req.body.name);
                 const totalAmount = parseInt(req.body.totalAmount);
                 const budgetID = String(req.body.budgetID);
-                const expirationDate = new Date(req.body.expirationDate);
-                const categories = req.body.categories;
+                const expirationDate = dateHelper.toDate(req.body.expirationDate);
 
                 const db = admin.firestore();
+                const docRef = db.collection('debts').doc();
 
-                const doc = db.collection('debts').doc().set({
+                docRef.set({
                     name: name,
+                    expirationDate: expirationDate,
+                    totalAmount: totalAmount,
                     budgetID: budgetID
                 })
                     .then(() => {
-                        /*/
-                        for (let i = 0; i < totalCategories; i++) {
-                            let categoryName = String(req.body.category[i].name);
-                            let categoryAmount = String(req.body.category[i].amount);
-                            db.collection('categories').doc().set({
-                                name: categoryName,
-                                amount: categoryAmount,
-                                budgetID: budgetID
+                        const debtID = docRef.id;
+                        const categories = req.body.categories;
+                        const amountPerCategory = totalAmount / categories.length;
+
+                        for (let i = 0; i < categories.length; i++) {
+                            let categoryID = String(categories[i]);
+
+                            db.collection('categoryDebt').doc().set({
+                                debtID: debtID,
+                                categoryID: categoryID,
+                                amount: amountPerCategory
                             })
                                 .then(() => res.status(200).send({success: true}))
                                 .catch(err => res.status(422)
-                                    .send({error: 'Kunne ikke oprette kategori.'}));
-                        }*/
-                        res.status(200).send({success: true});
+                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                        }
                     })
                     .catch(err => res.status(422).send({error: 'Kunne ikke oprette gæld.'}));
             })
