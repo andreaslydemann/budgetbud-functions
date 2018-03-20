@@ -7,14 +7,11 @@ module.exports = function (req, res) {
         admin.auth().verifyIdToken(token)
             .then(() => {
                 // Verify that the user provided category data
-                if (!req.body.category)
-                    return res.status(422).send({error: 'Ugyldig kategoridata angivet.'});
-
-                if (!req.body.budgetID)
+                if (!req.query.budgetID)
                     return res.status(422).send({error: 'Budget-ID ikke modtaget.'});
 
                 const totalCategories = String(req.body.category.length);
-                const budgetID = String(req.body.budgetID);
+                const budgetID = String(req.query.budgetID);
                 const db = admin.firestore();
 
                 for (let i = 0; i < totalCategories; i++) {

@@ -6,8 +6,11 @@ module.exports = function (req, res) {
         const token = req.get('Authorization').split('Bearer ')[1];
         admin.auth().verifyIdToken(token)
             .then(() => {
+                if (!req.query.budgetID)
+                    return res.status(400).send({error: 'Fejl i anmodningen.'});
+
                 const db = admin.firestore();
-                const budgetID = String(req.body.budgetID);
+                const budgetID = String(req.query.budgetID);
                 let categoryArray = [];
                 db.collection("categories").where("budgetID", "==", budgetID)
                     .get()
