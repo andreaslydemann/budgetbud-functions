@@ -17,7 +17,7 @@ module.exports = function (req, res) {
                 const income = String(req.body.income);
                 const db = admin.firestore();
 
-                // Create a new budget using the income and category
+                // Update a budget using the income and category
                 db.collection('budgets').where("userID", "==", cprNumber).update({
                     income: income
                 })
