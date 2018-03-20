@@ -19,10 +19,10 @@ module.exports = function (req, res) {
 
                 for (let i = 0; i < totalCategories; i++) {
                     let categoryName = String(req.body.category[i].name);
-                    let categoryValue = String(req.body.category[i].value);
+                    let categoryAmount = String(req.body.category[i].amount);
                     db.collection('categories').doc().set({
                         name: categoryName,
-                        value: categoryValue,
+                        amount: categoryAmount,
                         budgetID: budgetID
                     })
                         .then(() => res.status(200).send({success: true}))

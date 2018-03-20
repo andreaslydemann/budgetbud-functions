@@ -5,16 +5,13 @@ const requestCode = require('./request_code');
 const verifyCode = require('./verify_code');
 const createUser = require('./create_user');
 const deleteUser = require('./delete_user');
-const getBudget = require('./get_budgets');
-const createBudget = require('./create_budgets');
-const editBudget = require('./edit_budgets');
-
+const getBudget = require('./get_budget');
+const createBudget = require('./create_budget');
+const editBudget = require('./edit_budget');
 const getCategories = require('./get_categories');
 const createCategories = require('./create_categories');
-
 const getDebts = require('./get_debts');
 const createDebt = require('./create_debt');
-
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
