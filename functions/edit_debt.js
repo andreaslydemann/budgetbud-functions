@@ -59,12 +59,16 @@ module.exports = function (req, res) {
                                         }
                                     })
                             })
-                            .catch(() => res.status(422).send({error: 'Kunne ikke ændre gæld.'}));
+                            .catch(() => res.status(422)
+                                .send({error: 'Kunne ikke ændre gæld.'}));
                     } else {
-                        res.status(422).send({error: 'Gæld kunne ikke findes.'})
+                        res.status(422)
+                            .send({error: 'Gæld kunne ikke findes.'})
                     }
-                }).catch(() => res.status(401).send({error: 'Ukendt fejl opstod.'}));
+                }).catch(() => res.status(401)
+                    .send({error: 'Hentning af gæld fejlede.'}));
             })
-            .catch(() => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
+            .catch(() => res.status(401)
+                .send({error: "Brugeren kunne ikke verificeres."}));
     })
 };

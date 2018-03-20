@@ -18,11 +18,13 @@ module.exports = function (req, res) {
 
                         db.collection("users").doc(cprNumber).delete()
                             .then(() => res.status(200).send({success: true}))
-                            .catch(err => res.status(422)
+                            .catch(() => res.status(422)
                                 .send({error: 'Bruger blev slettet, men tilknyttet data blev ikke.'}));
                     })
-                    .catch(err => res.status(422).send({error: 'Sletning af brugeren fejlede.'}));
+                    .catch(() => res.status(422)
+                        .send({error: 'Sletning af brugeren fejlede.'}));
             })
-            .catch(err => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
+            .catch(() => res.status(401)
+                .send({error: "Brugeren kunne ikke verificeres."}));
     });
 };

@@ -27,14 +27,17 @@ module.exports = function (req, res) {
                                         });
 
                                         res.status(200).send({success: true})
-                                    })
+                                    });
                             })
-                            .catch(() => res.status(422).send({error: 'Sletning af gælden fejlede.'}));
+                            .catch(() => res.status(422)
+                                .send({error: 'Sletning af gælden fejlede.'}));
                     } else {
                         res.status(422).send({error: 'Gæld kunne ikke findes.'})
                     }
-                }).catch(() => res.status(401).send({error: 'Ukendt fejl opstod.'}));
+                }).catch(() => res.status(401)
+                    .send({error: 'Hentning af gæld fejlede.'}));
             })
-            .catch(() => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
+            .catch(() => res.status(401)
+                .send({error: "Brugeren kunne ikke verificeres."}));
     });
 };

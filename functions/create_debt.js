@@ -44,12 +44,14 @@ module.exports = function (req, res) {
                                 amount: amountPerCategory
                             })
                                 .then(() => res.status(200).send({success: true}))
-                                .catch(err => res.status(422)
+                                .catch(() => res.status(422)
                                     .send({error: 'Fejl opstod under gældsoprettelsen.'}));
                         }
                     })
-                    .catch(err => res.status(422).send({error: 'Kunne ikke oprette gæld.'}));
+                    .catch(() => res.status(422)
+                        .send({error: 'Kunne ikke oprette gæld.'}));
             })
-            .catch(err => res.status(401).send({error: err}));
+            .catch(() => res.status(401)
+                .send({error: "Brugeren kunne ikke verificeres."}));
     })
 };

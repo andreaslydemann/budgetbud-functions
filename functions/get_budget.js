@@ -17,16 +17,14 @@ module.exports = function (req, res) {
                     .then(function(querySnapshot) {
                         querySnapshot.forEach(function(doc) {
                             res.status(200).send({id: doc.id, data: doc.data()})
-                                .catch(err => res.status(422)
-                                    .send({error: 'Hentning af et budget dokument fejlede.'}));
+                                .catch(() => res.status(422)
+                                    .send({error: 'Hentning af et budget fejlede.'}));
                         });
                     })
                     .catch(function(error) {
                         console.log("Kunne ikke hente budgettet: ", error);
                     });
-
             })
-
             .catch(err => res.status(401).send({error: err}));
     })
 };
