@@ -16,9 +16,7 @@ module.exports = function (req, res) {
                     .get()
                     .then(function(querySnapshot) {
                         querySnapshot.forEach(function(doc) {
-                            console.log("Data: " + doc.data());
                             categoryArray.push(doc.data());
-                            console.log("Category array: " + categoryArray);
                         });
                         res.status(200).send(categoryArray)
                             .catch(err => res.status(422)
