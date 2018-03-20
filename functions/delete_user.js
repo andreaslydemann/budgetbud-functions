@@ -21,8 +21,8 @@ module.exports = function (req, res) {
                             .catch(err => res.status(422)
                                 .send({error: 'Bruger blev slettet, men tilknyttet data blev ikke.'}));
                     })
-                    .catch(err => res.status(422).send({error: 'Sletning af bruger fejlede.'}));
+                    .catch(err => res.status(422).send({error: 'Sletning af brugeren fejlede.'}));
             })
-            .catch(err => res.status(401).send({error: err}));
+            .catch(err => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
     });
 };
