@@ -23,40 +23,48 @@ module.exports = function (req, res) {
                 const debtID = String(req.body.debtID);
 
                 const db = admin.firestore();
+                const docRef = db.collection('debts').doc(debtID);
 
-                db.collection('debts').doc(debtID).set({
-                    name: name,
-                    expirationDate: expirationDate,
-                    totalAmount: totalAmount,
-                    budgetID: budgetID
-                })
-                    .then(() => {
-                        const categories = req.body.categories;
-                        const amountPerCategory = Math.round(totalAmount / categories.length);
+                docRef.get().then((doc) => {
+                    if (doc.exists) {
 
-                        db.collection("categoryDebt").where("debtID", "==", debtID)
-                            .get()
-                            .then(function (querySnapshot) {
-                                querySnapshot.forEach(function (doc) {
-                                    doc.ref.delete();
-                                });
+                        docRef.update({
+                            name: name,
+                            expirationDate: expirationDate,
+                            totalAmount: totalAmount,
+                            budgetID: budgetID
+                        })
+                            .then(() => {
+                                const categories = req.body.categories;
+                                const amountPerCategory = Math.round(totalAmount / categories.length);
 
-                                for (let i = 0; i < categories.length; i++) {
-                                    let categoryID = String(categories[i]);
+                                db.collection("categoryDebt").where("debtID", "==", debtID)
+                                    .get()
+                                    .then((querySnapshot) => {
+                                        querySnapshot.forEach((doc) => {
+                                            doc.ref.delete();
+                                        });
 
-                                    db.collection('categoryDebt').doc().set({
-                                        debtID: debtID,
-                                        categoryID: categoryID,
-                                        amount: amountPerCategory
+                                        for (let i = 0; i < categories.length; i++) {
+                                            let categoryID = String(categories[i]);
+
+                                            db.collection('categoryDebt').doc().set({
+                                                debtID: debtID,
+                                                categoryID: categoryID,
+                                                amount: amountPerCategory
+                                            })
+                                                .then(() => res.status(200).send({success: true}))
+                                                .catch(() => res.status(422)
+                                                    .send({error: 'Fejl opstod under gældsændringen.'}));
+                                        }
                                     })
-                                        .then(() => res.status(200).send({success: true}))
-                                        .catch(err => res.status(422)
-                                            .send({error: 'Fejl opstod under gældsændringen.'}));
-                                }
                             })
-                    })
-                    .catch(err => res.status(422).send({error: 'Kunne ikke ændre gæld.'}));
+                            .catch(() => res.status(422).send({error: 'Kunne ikke ændre gæld.'}));
+                    } else {
+                        res.status(422).send({error: 'Gæld kunne ikke findes.'})
+                    }
+                }).catch(() => res.status(401).send({error: 'Ukendt fejl opstod.'}));
             })
-            .catch(err => res.status(401).send({error: err}));
+            .catch(() => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
     })
 };
