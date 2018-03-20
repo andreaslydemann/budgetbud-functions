@@ -18,9 +18,9 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
 
                 for (let i = 0; i < totalCategories; i++) {
-                    let categoryValue = String(req.body.category[i].value);
+                    let categoryAmount = String(req.body.category[i].amount);
                     db.collection('categories').where("budgetID", "==", budgetID).update({
-                        value: categoryValue,
+                        amount: categoryAmount,
                     })
                         .then(() => res.status(200).send({success: true}))
                         .catch(err => res.status(422)
