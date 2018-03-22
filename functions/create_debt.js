@@ -22,31 +22,56 @@ module.exports = function (req, res) {
                 const expirationDate = dateHelper.toDate(req.body.expirationDate);
 
                 const db = admin.firestore();
-                const docRef = db.collection('debts').doc();
+                const debtRef = db.collection('debts').doc();
 
-                docRef.set({
+                debtRef.set({
                     name: name,
                     expirationDate: expirationDate,
                     totalAmount: totalAmount,
                     budgetID: budgetID
                 })
                     .then(() => {
-                        const debtID = docRef.id;
+                        const debtID = debtRef.id;
                         const categories = req.body.categories;
-                        const amountPerCategory = Math.round(totalAmount / categories.length);
+
+                        let sum = 0;
+                        for (let i = 0; i < categories.length; i++) {
+                            db.collection("categories").doc(categories[i]).get()
+                                .then((doc) => {
+                                    if (!doc.exists)
+                                        return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+
+                                    sum += doc.data().amount;
+                                });
+                        }
+
+                        const percentageToSubtract =
+                            ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
                         for (let i = 0; i < categories.length; i++) {
-                            let categoryID = String(categories[i]);
+                            const categoryID = String(categories[i]);
 
-                            db.collection('categoryDebt').doc().set({
+                            const catRef = db.collection("categories").doc(categoryID);
+                            const amountToSubtract = Math.round((catRef.data().amount / 100) * percentageToSubtract);
+
+                            catRef.update({
+                                amount: (catRef.data().amount - amountToSubtract)
+                            })
+                                .catch(() => res.status(422)
+                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+
+                            const catDebtRef = db.collection('categoryDebt').doc(categoryID);
+
+                            catDebtRef.set({
                                 debtID: debtID,
                                 categoryID: categoryID,
-                                amount: amountPerCategory
+                                amount: (catDebtRef.data().amount - amountToSubtract)
                             })
-                                .then(() => res.status(200).send({success: true}))
                                 .catch(() => res.status(422)
                                     .send({error: 'Fejl opstod under gældsoprettelsen.'}));
                         }
+
+                        res.status(200).send({success: true});
                     })
                     .catch(() => res.status(422)
                         .send({error: 'Kunne ikke oprette gæld.'}));

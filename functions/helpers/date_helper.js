@@ -14,7 +14,23 @@ const toDate = function (dateStr) {
     return new Date(parts[2], parts[1] - 1, parts[0]);
 };
 
+const numberOfMonthsUntilDate = function (endDate) {
+    let startDate = Date().now;
+    let startYear = startDate.getFullYear();
+    let endYear = endDate.getFullYear();
+    let startMonth = startDate.getMonth();
+    let endMonth = endDate.getMonth();
+
+    if (startMonth === 0) {
+        startMonth++;
+        endMonth++;
+    }
+
+    return ((endYear - startYear) * 12 + (endMonth - startMonth) + 1);
+};
+
 module.exports = {
     toDateString,
     toDate,
+    numberOfMonthsUntilDate
 };
