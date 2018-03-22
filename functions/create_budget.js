@@ -13,14 +13,19 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
                 const userID = String(req.body.userID);
                 const income = String(req.body.income);
+                const totalExpenses = String(req.body.totalExpenses);
+                const disposable = String(req.body.disposable);
+
                 const totalCategories = String(req.body.categories.length);
                 const budgetID = String(req.body.budgetID);
                 const categories = req.body.categories;
 
                 // Create a new budget using the income and category
                 db.collection('budgets').doc().set({
+                    userID,
                     income,
-                    userID
+                    totalExpenses,
+                    disposable
                 })
                     .then(() => res.status(200).send({success: true}))
                     .catch(err => res.status(422)
