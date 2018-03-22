@@ -23,48 +23,104 @@ module.exports = function (req, res) {
                 const debtID = String(req.body.debtID);
 
                 const db = admin.firestore();
-                const docRef = db.collection('debts').doc(debtID);
 
-                docRef.get().then((doc) => {
-                    if (doc.exists) {
+                db.collection('debts').doc(debtID).get().then((doc) => {
+                    if (!doc.exists)
+                        res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
-                        docRef.update({
-                            name: name,
-                            expirationDate: expirationDate,
-                            totalAmount: totalAmount,
-                            budgetID: budgetID
-                        })
-                            .then(() => {
-                                const categories = req.body.categories;
-                                const amountPerCategory = Math.round(totalAmount / categories.length);
+                    doc.ref.update({
+                        name: name,
+                        expirationDate: expirationDate,
+                        totalAmount: totalAmount,
+                        budgetID: budgetID
+                    })
+                        .then(() => {
+                            const categories = req.body.categories;
 
-                                db.collection("categoryDebt").where("debtID", "==", debtID)
-                                    .get()
-                                    .then((querySnapshot) => {
-                                        querySnapshot.forEach((doc) => {
-                                            doc.ref.delete();
+                            let sum = 0;
+                            let calcSumPromises = [];
+
+                            for (let i = 0; i < categories.length; i++) {
+                                const calcSumPromise = db.collection("categories").doc(categories[i]).get()
+                                    .then((doc) => {
+                                        if (!doc.exists)
+                                            return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+
+                                        sum += parseInt(doc.data().amount);
+                                    });
+                                calcSumPromises.push(calcSumPromise);
+                            }
+
+                            Promise.all(calcSumPromises)
+                                .then(() => {
+                                    const percentageToSubtract =
+                                        ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+
+                                    if (percentageToSubtract > 100)
+                                        return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
+
+                                    db.collection("categoryDebt").where("debtID", "==", debtID)
+                                        .get()
+                                        .then((querySnapshot) => {
+                                            let returnAmountsPromises = [];
+
+                                            for (let i = 0; i < querySnapshot.docs.length; i++) {
+                                                let returnAmountsPromise = db.collection("categories").doc(querySnapshot.docs[i].id)
+                                                    .get()
+                                                    .then((cDoc) => {
+                                                        cDoc.ref.update({
+                                                            amount: (cDoc.data().amount + cdDoc.data().amount)
+                                                        })
+                                                            .catch(() => res.status(422)
+                                                                .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+
+                                                        querySnapshot.docs[i].ref.delete();
+                                                    });
+
+                                                returnAmountsPromises.push(returnAmountsPromise);
+                                            }
+
+                                            Promise.all(returnAmountsPromises)
+                                                .then(() => {
+                                                    let modifyAmountsPromises = [];
+
+                                                    for (let i = 0; i < categories.length; i++) {
+                                                        const categoryID = String(categories[i]);
+
+                                                        const modifyAmountsPromise = db.collection("categories").doc(categoryID).get()
+                                                            .then((doc) => {
+                                                                const categoryAmount = parseInt(doc.data().amount);
+                                                                const amountToSubtract =
+                                                                    Math.round((categoryAmount / 100) * percentageToSubtract);
+
+                                                                doc.ref.update({
+                                                                    amount: (categoryAmount - amountToSubtract)
+                                                                })
+                                                                    .catch(() => res.status(422)
+                                                                        .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+
+                                                                db.collection('categoryDebt').doc().set({
+                                                                    debtID: debtID,
+                                                                    categoryID: categoryID,
+                                                                    amount: amountToSubtract
+                                                                })
+                                                                    .catch(() => res.status(422)
+                                                                        .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                                                            });
+
+                                                        modifyAmountsPromises.push(modifyAmountsPromise);
+                                                    }
+
+                                                    Promise.all(modifyAmountsPromises)
+                                                        .then(() => {
+                                                            res.status(200).send({success: true});
+                                                        });
+                                                })
                                         });
-
-                                        for (let i = 0; i < categories.length; i++) {
-                                            let categoryID = String(categories[i]);
-
-                                            db.collection('categoryDebt').doc().set({
-                                                debtID: debtID,
-                                                categoryID: categoryID,
-                                                amount: amountPerCategory
-                                            })
-                                                .then(() => res.status(200).send({success: true}))
-                                                .catch(() => res.status(422)
-                                                    .send({error: 'Fejl opstod under gældsændringen.'}));
-                                        }
-                                    })
-                            })
-                            .catch(() => res.status(422)
-                                .send({error: 'Kunne ikke ændre gæld.'}));
-                    } else {
-                        res.status(422)
-                            .send({error: 'Gæld kunne ikke findes.'})
-                    }
+                                });
+                        })
+                        .catch(() => res.status(422)
+                            .send({error: 'Kunne ikke ændre gæld.'}));
                 }).catch(() => res.status(401)
                     .send({error: 'Hentning af gæld fejlede.'}));
             })

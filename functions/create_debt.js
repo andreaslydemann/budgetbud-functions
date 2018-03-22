@@ -35,43 +35,63 @@ module.exports = function (req, res) {
                         const categories = req.body.categories;
 
                         let sum = 0;
+                        let calcSumPromises = [];
+
                         for (let i = 0; i < categories.length; i++) {
-                            db.collection("categories").doc(categories[i]).get()
+                            const calcSumPromise = db.collection("categories").doc(categories[i]).get()
                                 .then((doc) => {
                                     if (!doc.exists)
                                         return res.status(400).send({error: 'Kategori kunne ikke findes.'});
 
-                                    sum += doc.data().amount;
+                                    sum += parseInt(doc.data().amount);
                                 });
+
+                            calcSumPromises.push(calcSumPromise);
                         }
 
-                        const percentageToSubtract =
-                            ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+                        Promise.all(calcSumPromises)
+                            .then(() => {
+                                const percentageToSubtract =
+                                    ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
-                        for (let i = 0; i < categories.length; i++) {
-                            const categoryID = String(categories[i]);
+                                if (percentageToSubtract > 100)
+                                    return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
 
-                            const catRef = db.collection("categories").doc(categoryID);
-                            const amountToSubtract = Math.round((catRef.data().amount / 100) * percentageToSubtract);
+                                let modifyAmountsPromises = [];
 
-                            catRef.update({
-                                amount: (catRef.data().amount - amountToSubtract)
-                            })
-                                .catch(() => res.status(422)
-                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                                for (let i = 0; i < categories.length; i++) {
+                                    const categoryID = String(categories[i]);
 
-                            const catDebtRef = db.collection('categoryDebt').doc(categoryID);
+                                    const modifyAmountsPromise = db.collection("categories").doc(categoryID)
+                                        .get()
+                                        .then((doc) => {
+                                            const categoryAmount = parseInt(doc.data().amount);
+                                            const amountToSubtract =
+                                                Math.round((categoryAmount / 100) * percentageToSubtract);
 
-                            catDebtRef.set({
-                                debtID: debtID,
-                                categoryID: categoryID,
-                                amount: (catDebtRef.data().amount - amountToSubtract)
-                            })
-                                .catch(() => res.status(422)
-                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
-                        }
+                                            doc.ref.update({
+                                                amount: (categoryAmount - amountToSubtract)
+                                            })
+                                                .catch(() => res.status(422)
+                                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
 
-                        res.status(200).send({success: true});
+                                            db.collection('categoryDebt').doc().set({
+                                                debtID: debtID,
+                                                categoryID: categoryID,
+                                                amount: amountToSubtract
+                                            })
+                                                .catch(() => res.status(422)
+                                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                                        });
+
+                                    modifyAmountsPromises.push(modifyAmountsPromise);
+                                }
+
+                                Promise.all(modifyAmountsPromises)
+                                    .then(() => {
+                                        res.status(200).send({success: true});
+                                    });
+                            });
                     })
                     .catch(() => res.status(422)
                         .send({error: 'Kunne ikke oprette gæld.'}));

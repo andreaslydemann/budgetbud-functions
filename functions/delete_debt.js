@@ -11,30 +11,46 @@ module.exports = function (req, res) {
                     return res.status(400).send({error: 'Intet gæld er angivet.'});
 
                 const debtID = String(req.body.debtID);
-
                 const db = admin.firestore();
-                const docRef = db.collection('debts').doc(debtID);
 
-                docRef.get().then((doc) => {
-                    if (doc.exists) {
+                db.collection('debts').doc(debtID)
+                    .get()
+                    .then((doc) => {
+                        if (!doc.exists)
+                            res.status(422).send({error: 'Gæld kunne ikke findes.'});
+
                         db.collection("debts").doc(debtID).delete()
                             .then(() => {
                                 db.collection("categoryDebt").where("debtID", "==", debtID)
                                     .get()
                                     .then((querySnapshot) => {
-                                        querySnapshot.forEach((doc) => {
-                                            doc.ref.delete();
-                                        });
+                                        let returnAmountsPromises = [];
 
-                                        res.status(200).send({success: true})
+                                        for (let i = 0; i < querySnapshot.docs.length; i++) {
+                                            let returnAmountsPromise = db.collection("categories").doc(querySnapshot.docs[i].id)
+                                                .get()
+                                                .then((cDoc) => {
+                                                    cDoc.ref.update({
+                                                        amount: (cDoc.data().amount + cdDoc.data().amount)
+                                                    })
+                                                        .catch(() => res.status(422)
+                                                            .send({error: 'Fejl opstod under gældssletningen.'}));
+
+                                                    querySnapshot.docs[i].ref.delete();
+                                                });
+
+                                            returnAmountsPromises.push(returnAmountsPromise);
+                                        }
+
+                                        Promise.all(returnAmountsPromises)
+                                            .then(() => {
+                                                res.status(200).send({success: true});
+                                            });
                                     });
                             })
                             .catch(() => res.status(422)
                                 .send({error: 'Sletning af gælden fejlede.'}));
-                    } else {
-                        res.status(422).send({error: 'Gæld kunne ikke findes.'})
-                    }
-                }).catch(() => res.status(401)
+                    }).catch(() => res.status(401)
                     .send({error: 'Hentning af gæld fejlede.'}));
             })
             .catch(() => res.status(401)

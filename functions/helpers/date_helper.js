@@ -15,7 +15,7 @@ const toDate = function (dateStr) {
 };
 
 const numberOfMonthsUntilDate = function (endDate) {
-    let startDate = Date().now;
+    let startDate = new Date();
     let startYear = startDate.getFullYear();
     let endYear = endDate.getFullYear();
     let startMonth = startDate.getMonth();
