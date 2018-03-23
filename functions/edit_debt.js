@@ -55,8 +55,6 @@ module.exports = function (req, res) {
                                     const percentageToSubtract =
                                         ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
-                                    console.log("per " + percentageToSubtract);
-
                                     if (percentageToSubtract > 100)
                                         return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
 
