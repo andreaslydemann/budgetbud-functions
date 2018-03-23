@@ -10,9 +10,10 @@ module.exports = function (req, res) {
                 if (!req.body.income || !req.body.categories)
                     return res.status(422).send({error: 'Fejl i indtastningen.'});
 
+                const db = admin.firestore();
                 const budgetID = String(req.body.budgetID);
                 const income = String(req.body.income);
-                const db = admin.firestore();
+                const categories = req.body.categories;
 
                 // Update a budget using the income and category
                 db.collection('budgets').doc(budgetID).update({
@@ -22,14 +23,12 @@ module.exports = function (req, res) {
                     .catch(err => res.status(422)
                         .send({error: 'Kunne ikke opdatere budget.'}));
 
-                const categories = req.body.categories;
-
                 db.collection("categories").where("budgetID", "==", budgetID)
                     .get()
                     .then(function(querySnapshot) {
                         let i = 0;
                         querySnapshot.forEach(function(doc) {
-                            doc.update({
+                            doc.ref.update({
                                 amount: categories[i].amount
                             })
                             i++;
