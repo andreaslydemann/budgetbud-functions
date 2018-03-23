@@ -27,14 +27,17 @@ module.exports = function (req, res) {
                                         let returnAmountsPromises = [];
 
                                         for (let i = 0; i < querySnapshot.docs.length; i++) {
-                                            let returnAmountsPromise = db.collection("categories").doc(querySnapshot.docs[i].id)
+                                            let categoryAmount = querySnapshot.docs[i].data().amount;
+                                            let categoryID = querySnapshot.docs[i].data().categoryID;
+
+                                            let returnAmountsPromise = db.collection("categories").doc(categoryID)
                                                 .get()
-                                                .then((cDoc) => {
-                                                    cDoc.ref.update({
-                                                        amount: (cDoc.data().amount + cdDoc.data().amount)
+                                                .then((doc) => {
+                                                    doc.ref.update({
+                                                        amount: (doc.data().amount + categoryAmount)
                                                     })
                                                         .catch(() => res.status(422)
-                                                            .send({error: 'Fejl opstod under gældssletningen.'}));
+                                                            .send({error: 'Fejl opstod under gældsændringen.'}));
 
                                                     querySnapshot.docs[i].ref.delete();
                                                 });

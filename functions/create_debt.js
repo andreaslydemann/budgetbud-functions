@@ -24,6 +24,24 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
                 const debtRef = db.collection('debts').doc();
 
+                const debtID = debtRef.id;
+                const categories = req.body.categories;
+
+                let sum = 0;
+                let calcSumPromises = [];
+
+                for (let i = 0; i < categories.length; i++) {
+                    const calcSumPromise = db.collection("categories").doc(categories[i]).get()
+                        .then((doc) => {
+                            if (!doc.exists)
+                                return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+
+                            sum += parseInt(doc.data().amount);
+                        });
+
+                    calcSumPromises.push(calcSumPromise);
+                }
+
                 debtRef.set({
                     name: name,
                     expirationDate: expirationDate,
@@ -31,24 +49,6 @@ module.exports = function (req, res) {
                     budgetID: budgetID
                 })
                     .then(() => {
-                        const debtID = debtRef.id;
-                        const categories = req.body.categories;
-
-                        let sum = 0;
-                        let calcSumPromises = [];
-
-                        for (let i = 0; i < categories.length; i++) {
-                            const calcSumPromise = db.collection("categories").doc(categories[i]).get()
-                                .then((doc) => {
-                                    if (!doc.exists)
-                                        return res.status(400).send({error: 'Kategori kunne ikke findes.'});
-
-                                    sum += parseInt(doc.data().amount);
-                                });
-
-                            calcSumPromises.push(calcSumPromise);
-                        }
-
                         Promise.all(calcSumPromises)
                             .then(() => {
                                 const percentageToSubtract =

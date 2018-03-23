@@ -24,7 +24,7 @@ module.exports = function (req, res) {
 
                         res.status(200).send(debtArray)
                     })
-                    .catch(err => res.status(422).send({error: 'Kunne ikke hente gælden.'}));
+                    .catch(() => res.status(422).send({error: 'Kunne ikke hente gælden.'}));
             })
             .catch(err => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
     });

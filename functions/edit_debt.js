@@ -21,12 +21,27 @@ module.exports = function (req, res) {
                 const expirationDate = dateHelper.toDate(req.body.expirationDate);
                 const budgetID = String(req.body.budgetID);
                 const debtID = String(req.body.debtID);
+                const categories = req.body.categories;
 
                 const db = admin.firestore();
 
                 db.collection('debts').doc(debtID).get().then((doc) => {
                     if (!doc.exists)
                         res.status(422).send({error: 'Gæld kunne ikke findes.'});
+
+                    let sum = 0;
+                    let calcSumPromises = [];
+
+                    for (let i = 0; i < categories.length; i++) {
+                        const calcSumPromise = db.collection("categories").doc(categories[i]).get()
+                            .then((doc) => {
+                                if (!doc.exists)
+                                    return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+
+                                sum += parseInt(doc.data().amount);
+                            });
+                        calcSumPromises.push(calcSumPromise);
+                    }
 
                     doc.ref.update({
                         name: name,
@@ -35,26 +50,12 @@ module.exports = function (req, res) {
                         budgetID: budgetID
                     })
                         .then(() => {
-                            const categories = req.body.categories;
-
-                            let sum = 0;
-                            let calcSumPromises = [];
-
-                            for (let i = 0; i < categories.length; i++) {
-                                const calcSumPromise = db.collection("categories").doc(categories[i]).get()
-                                    .then((doc) => {
-                                        if (!doc.exists)
-                                            return res.status(400).send({error: 'Kategori kunne ikke findes.'});
-
-                                        sum += parseInt(doc.data().amount);
-                                    });
-                                calcSumPromises.push(calcSumPromise);
-                            }
-
                             Promise.all(calcSumPromises)
                                 .then(() => {
                                     const percentageToSubtract =
                                         ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+
+                                    console.log("per " + percentageToSubtract);
 
                                     if (percentageToSubtract > 100)
                                         return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
@@ -65,14 +66,17 @@ module.exports = function (req, res) {
                                             let returnAmountsPromises = [];
 
                                             for (let i = 0; i < querySnapshot.docs.length; i++) {
-                                                let returnAmountsPromise = db.collection("categories").doc(querySnapshot.docs[i].id)
+                                                let categoryAmount = querySnapshot.docs[i].data().amount;
+                                                let categoryID = querySnapshot.docs[i].data().categoryID;
+
+                                                let returnAmountsPromise = db.collection("categories").doc(categoryID)
                                                     .get()
-                                                    .then((cDoc) => {
-                                                        cDoc.ref.update({
-                                                            amount: (cDoc.data().amount + cdDoc.data().amount)
+                                                    .then((doc) => {
+                                                        doc.ref.update({
+                                                            amount: (doc.data().amount + categoryAmount)
                                                         })
                                                             .catch(() => res.status(422)
-                                                                .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                                                                .send({error: 'Fejl opstod under gældsændringen.'}));
 
                                                         querySnapshot.docs[i].ref.delete();
                                                     });
@@ -87,7 +91,8 @@ module.exports = function (req, res) {
                                                     for (let i = 0; i < categories.length; i++) {
                                                         const categoryID = String(categories[i]);
 
-                                                        const modifyAmountsPromise = db.collection("categories").doc(categoryID).get()
+                                                        const modifyAmountsPromise = db.collection("categories").doc(categoryID)
+                                                            .get()
                                                             .then((doc) => {
                                                                 const categoryAmount = parseInt(doc.data().amount);
                                                                 const amountToSubtract =

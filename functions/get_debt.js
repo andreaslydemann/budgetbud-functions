@@ -16,37 +16,34 @@ module.exports = function (req, res) {
                 db.collection("debts").doc(debtID)
                     .get()
                     .then((doc) => {
-                        if (doc.exists) {
+                        if (doc.exists)
+                            res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
-                            const name = String(doc.data().name);
-                            const totalAmount = parseInt(doc.data().totalAmount);
-                            const budgetID = String(doc.data().budgetID);
-                            const expirationDate = String(
-                                dateHelper.toDateString(new Date(doc.data().expirationDate)));
+                        const name = String(doc.data().name);
+                        const totalAmount = parseInt(doc.data().totalAmount);
+                        const budgetID = String(doc.data().budgetID);
+                        const expirationDate = String(
+                            dateHelper.toDateString(new Date(doc.data().expirationDate)));
 
-                            db.collection("categoryDebt").where("debtID", "==", debtID)
-                                .get()
-                                .then((querySnapshot) => {
-                                    const categories = [];
+                        db.collection("categoryDebt").where("debtID", "==", debtID)
+                            .get()
+                            .then((querySnapshot) => {
+                                const categories = [];
 
-                                    querySnapshot.forEach((doc) => {
-                                        categories.push(doc.data().categoryID);
-                                    });
+                                querySnapshot.forEach((doc) => {
+                                    categories.push(doc.data().categoryID);
+                                });
 
-                                    res.status(200).send({
-                                        name: name,
-                                        totalAmount: totalAmount,
-                                        expirationDate: expirationDate,
-                                        budgetID: budgetID,
-                                        categories: categories
-                                    });
-                                })
-                                .catch(() => res.status(422)
-                                    .send({error: 'Hentning af kategorier fejlede.'}));
-                        } else {
-                            res.status(422)
-                                .send({error: 'Gæld kunne ikke findes.'})
-                        }
+                                res.status(200).send({
+                                    name: name,
+                                    totalAmount: totalAmount,
+                                    expirationDate: expirationDate,
+                                    budgetID: budgetID,
+                                    categories: categories
+                                });
+                            })
+                            .catch(() => res.status(422)
+                                .send({error: 'Hentning af kategorier fejlede.'}));
                     }).catch(() => res.status(401)
                     .send({error: 'Hentning af gæld fejlede.'}));
             })
