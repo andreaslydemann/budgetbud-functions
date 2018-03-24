@@ -13,19 +13,19 @@ module.exports = function (req, res) {
                 const budgetID = String(req.query.budgetID);
                 const db = admin.firestore();
 
-                let debtArray = [];
-
                 db.collection("debts").where("budgetID", "==", budgetID)
                     .get()
-                    .then(function (querySnapshot) {
-                        querySnapshot.forEach(function (doc) {
+                    .then((querySnapshot) => {
+                        let debtArray = [];
+
+                        querySnapshot.forEach((doc) => {
                             debtArray.push({id: doc.id, data: doc.data()});
                         });
 
-                        res.status(200).send(debtArray)
+                        res.status(200).send(debtArray);
                     })
                     .catch(() => res.status(422).send({error: 'Kunne ikke hente gælden.'}));
             })
-            .catch(err => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
+            .catch(() => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
     });
 };

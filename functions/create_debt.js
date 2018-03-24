@@ -20,12 +20,9 @@ module.exports = function (req, res) {
                 const totalAmount = parseInt(req.body.totalAmount);
                 const budgetID = String(req.body.budgetID);
                 const expirationDate = dateHelper.toDate(req.body.expirationDate);
+                const categories = req.body.categories;
 
                 const db = admin.firestore();
-                const debtRef = db.collection('debts').doc();
-
-                const debtID = debtRef.id;
-                const categories = req.body.categories;
 
                 let sum = 0;
                 let calcSumPromises = [];
@@ -41,6 +38,9 @@ module.exports = function (req, res) {
 
                     calcSumPromises.push(calcSumPromise);
                 }
+
+                const debtRef = db.collection('debts').doc();
+                const debtID = debtRef.id;
 
                 debtRef.set({
                     name: name,
@@ -71,17 +71,15 @@ module.exports = function (req, res) {
 
                                             doc.ref.update({
                                                 amount: (categoryAmount - amountToSubtract)
-                                            })
-                                                .catch(() => res.status(422)
-                                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                                            }).catch(() => res.status(422)
+                                                .send({error: 'Fejl opstod under gældsoprettelsen.'}));
 
                                             db.collection('categoryDebt').doc().set({
                                                 debtID: debtID,
                                                 categoryID: categoryID,
                                                 amount: amountToSubtract
-                                            })
-                                                .catch(() => res.status(422)
-                                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+                                            }).catch(() => res.status(422)
+                                                .send({error: 'Fejl opstod under gældsoprettelsen.'}));
                                         });
 
                                     modifyAmountsPromises.push(modifyAmountsPromise);
