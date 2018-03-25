@@ -20,7 +20,7 @@ module.exports = function (req, res) {
                             res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
                         const name = String(doc.data().name);
-                        const totalAmount = parseInt(doc.data().totalAmount);
+                        const amount = parseInt(doc.data().amount);
                         const budgetID = String(doc.data().budgetID);
                         const expirationDate = String(
                             dateHelper.toDateString(new Date(doc.data().expirationDate)));
@@ -36,7 +36,7 @@ module.exports = function (req, res) {
 
                                 res.status(200).send({
                                     name: name,
-                                    totalAmount: totalAmount,
+                                    amount: amount,
                                     expirationDate: expirationDate,
                                     budgetID: budgetID,
                                     categories: categories
