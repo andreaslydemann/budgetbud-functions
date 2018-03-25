@@ -7,7 +7,7 @@ module.exports = function (req, res) {
         const token = req.get('Authorization').split('Bearer ')[1];
         admin.auth().verifyIdToken(token)
             .then(() => {
-                if (!req.body.name || !req.body.totalAmount || !req.body.budgetID)
+                if (!req.body.name || !req.body.amount || !req.body.budgetID)
                     return res.status(422).send({error: 'Fejl i indtastning.'});
 
                 if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
@@ -17,7 +17,7 @@ module.exports = function (req, res) {
                     return res.status(422).send({error: 'Ingen kategorier valgt.'});
 
                 const name = String(req.body.name);
-                const totalAmount = parseInt(req.body.totalAmount);
+                const amount = parseInt(req.body.amount);
                 const budgetID = String(req.body.budgetID);
                 const expirationDate = dateHelper.toDate(req.body.expirationDate);
                 const categories = req.body.categories;
@@ -44,15 +44,15 @@ module.exports = function (req, res) {
 
                 debtRef.set({
                     name: name,
+                    amount: amount,
                     expirationDate: expirationDate,
-                    totalAmount: totalAmount,
                     budgetID: budgetID
                 })
                     .then(() => {
                         Promise.all(calcSumPromises)
                             .then(() => {
                                 const percentageToSubtract =
-                                    ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+                                    ((amount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
                                 if (percentageToSubtract > 100)
                                     return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
