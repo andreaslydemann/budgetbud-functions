@@ -17,8 +17,6 @@ module.exports = function (req, res) {
                     .where("budgetID", "==", budgetID)
                     .get()
                     .then((querySnapshot) => {
-                        console.log(querySnapshot);
-
                         let categoryArray = [];
 
                         querySnapshot.forEach((doc) => {
