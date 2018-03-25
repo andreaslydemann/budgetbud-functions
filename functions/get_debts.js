@@ -19,7 +19,7 @@ module.exports = function (req, res) {
                         let debtArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            debtArray.push({id: doc.id, data: doc.data()});
+                            debtArray.push({id: doc.id, debtData: doc.data()});
                         });
 
                         res.status(200).send(debtArray);
