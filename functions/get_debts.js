@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
+const dateHelper = require('./helpers/date_helper');
 
 module.exports = function (req, res) {
     cors(req, res, () => {
@@ -19,7 +20,12 @@ module.exports = function (req, res) {
                         let debtArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            debtArray.push({id: doc.id, debtData: doc.data()});
+                            const data = doc.data();
+
+                            data.expirationDate = String(
+                                dateHelper.toDateString(new Date(doc.data().expirationDate)));
+
+                            debtArray.push({id: doc.id, debtData: data});
                         });
 
                         res.status(200).send(debtArray);

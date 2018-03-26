@@ -11,8 +11,8 @@ const createBudget = require('./create_budget');
 const editBudget = require('./edit_budget');
 const deleteBudget = require('./delete_budget');
 const getCategories = require('./get_categories');
+const getCategoriesOfDebt = require('./get_categories_of_debt');
 const getDebts = require('./get_debts');
-const getDebt = require('./get_debt');
 const createDebt = require('./create_debt');
 const editDebt = require('./edit_debt');
 const deleteDebt = require('./delete_debt');
@@ -31,11 +31,13 @@ exports.getBudget = functions.https.onRequest(getBudget);
 exports.createBudget = functions.https.onRequest(createBudget);
 exports.editBudget = functions.https.onRequest(editBudget);
 exports.deleteBudget = functions.https.onRequest(deleteBudget);
+
+// ----------CATEGORY RELATED FUNCTIONS----------
 exports.getCategories = functions.https.onRequest(getCategories);
+exports.getCategoriesOfDebt = functions.https.onRequest(getCategoriesOfDebt);
 
 // ----------DEBT RELATED FUNCTIONS----------
 exports.getDebts = functions.https.onRequest(getDebts);
-exports.getDebt = functions.https.onRequest(getDebt);
 exports.createDebt = functions.https.onRequest(createDebt);
 exports.editDebt = functions.https.onRequest(editDebt);
 exports.deleteDebt = functions.https.onRequest(deleteDebt);

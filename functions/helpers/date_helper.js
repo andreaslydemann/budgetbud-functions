@@ -1,12 +1,12 @@
 const toDateString = function (date) {
-    let month = String(date.getMonth() + 1);
     let day = String(date.getDate());
+    let month = String(date.getMonth() + 1);
     const year = String(date.getFullYear());
 
-    if (month.length < 2) month = '0' + month;
     if (day.length < 2) day = '0' + day;
+    if (month.length < 2) month = '0' + month;
 
-    return `${month}-${day}-${year}`;
+    return `${day}-${month}-${year}`;
 };
 
 const toDate = function (dateStr) {
