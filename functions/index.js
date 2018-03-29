@@ -12,6 +12,7 @@ const editBudget = require('./edit_budget');
 const deleteBudget = require('./delete_budget');
 const getCategories = require('./get_categories');
 const getCategoriesOfDebt = require('./get_categories_of_debt');
+const calculateCategorySubtractions = require('./calculate_category_subtractions');
 const getDebts = require('./get_debts');
 const createDebt = require('./create_debt');
 const editDebt = require('./edit_debt');
@@ -35,6 +36,7 @@ exports.deleteBudget = functions.https.onRequest(deleteBudget);
 // ----------CATEGORY RELATED FUNCTIONS----------
 exports.getCategories = functions.https.onRequest(getCategories);
 exports.getCategoriesOfDebt = functions.https.onRequest(getCategoriesOfDebt);
+exports.calculateCategorySubtractions = functions.https.onRequest(calculateCategorySubtractions);
 
 // ----------DEBT RELATED FUNCTIONS----------
 exports.getDebts = functions.https.onRequest(getDebts);
