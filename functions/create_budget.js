@@ -15,12 +15,10 @@ module.exports = function (req, res) {
                 const income = String(req.body.income);
                 const totalExpenses = String(req.body.totalExpenses);
                 const disposable = String(req.body.disposable);
-                const totalCategories = String(req.body.categories.length);
                 const categories = req.body.categories;
 
                 // Create a new budget using the income and category
                 let budgetRef = db.collection('budgets').doc();
-
                 budgetRef.set({
                     userID,
                     income,
@@ -31,9 +29,9 @@ module.exports = function (req, res) {
                     .catch(err => res.status(422)
                         .send({error: 'Kunne ikke oprette budget.'}));
 
-                const budgetID = budgetRef.id;
+                const  budgetID = budgetRef.id;
 
-                for (let i = 0; i < totalCategories; i++) {
+                for (let i = 0; i < categories.length; i++) {
                     let categoryName = String(categories[i].name);
                     let categoryAmount = String(categories[i].amount);
                     db.collection('categories').doc().set({

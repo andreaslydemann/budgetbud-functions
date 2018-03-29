@@ -6,6 +6,7 @@ const requestCode = require('./request_code');
 const verifyCode = require('./verify_code');
 const createUser = require('./create_user');
 const deleteUser = require('./delete_user');
+const getBudgetID = require('./get_budget_id');
 const getBudget = require('./get_budget');
 const createBudget = require('./create_budget');
 const editBudget = require('./edit_budget');
@@ -22,11 +23,14 @@ admin.initializeApp({
     databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
 });
 
-// ----------BUDGET RELATED FUNCTIONS----------
+// ----------AUTH RELATED FUNCTIONS----------
 exports.requestCode = functions.https.onRequest(requestCode);
 exports.verifyCode = functions.https.onRequest(verifyCode);
 exports.createUser = functions.https.onRequest(createUser);
 exports.deleteUser = functions.https.onRequest(deleteUser);
+
+// ----------BUDGET RELATED FUNCTIONS----------
+exports.getBudgetID = functions.https.onRequest(getBudgetID);
 exports.getBudget = functions.https.onRequest(getBudget);
 exports.createBudget = functions.https.onRequest(createBudget);
 exports.editBudget = functions.https.onRequest(editBudget);
