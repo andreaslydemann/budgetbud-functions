@@ -6,25 +6,25 @@ module.exports = function (req, res) {
         const token = req.get('Authorization').split('Bearer ')[1];
         admin.auth().verifyIdToken(token)
             .then(() => {
-                if (!req.query.userID)
+                if (!req.query.budgetID)
                     return res.status(400
                     ).send({error: 'Fejl i anmodningen.'});
 
                 const db = admin.firestore();
-                const userID = String(req.query.userID);
+                const budgetID = String(req.query.budgetID);
+                console.log("BudgetID: " + budgetID);
 
-                db.collection("budgets").where("userID", "==", userID)
-                    .get()
-                    .then(function(querySnapshot) {
-                        querySnapshot.forEach(function(doc) {
-                            res.status(200).send({id: doc.id, budgetData: doc.data()})
-                                .catch(() => res.status(422)
-                                    .send({error: 'Hentning af et budget fejlede.'}));
-                        });
-                    })
-                    .catch(function(error) {
+                db.collection('budgets').doc(budgetID).get()
+                    .then(doc => {
+                            if (!doc.exists) {
+                                return res.status(400).send({error: 'Budgettet eksisterer ikke.'});
+                            }
+                            res.status(200).send({budgetData: doc.data()});
+                        }
+                    )
+                    .catch(function (error) {
                         console.log("Kunne ikke hente budgettet: ", error);
-                    });
+                    })
             })
             .catch(err => res.status(401).send({error: err}));
     })
