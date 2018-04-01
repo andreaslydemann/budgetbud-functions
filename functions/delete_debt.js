@@ -21,7 +21,7 @@ module.exports = function (req, res) {
 
                         db.collection("debts").doc(debtID).delete()
                             .then(() => {
-                                db.collection("categoryDebt").where("debtID", "==", debtID)
+                                db.collection("categoryDebts").where("debtID", "==", debtID)
                                     .get()
                                     .then((querySnapshot) => {
                                         let returnAmountsPromises = [];

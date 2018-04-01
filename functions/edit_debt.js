@@ -58,7 +58,7 @@ module.exports = function (req, res) {
                                     if (percentageToSubtract > 100)
                                         return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
 
-                                    db.collection("categoryDebt").where("debtID", "==", debtID)
+                                    db.collection("categoryDebts").where("debtID", "==", debtID)
                                         .get()
                                         .then((querySnapshot) => {
                                             let returnAmountsPromises = [];
@@ -102,7 +102,7 @@ module.exports = function (req, res) {
                                                                     .catch(() => res.status(422)
                                                                         .send({error: 'Fejl opstod under gældsoprettelsen.'}));
 
-                                                                db.collection('categoryDebt').doc().set({
+                                                                db.collection('categoryDebts').doc().set({
                                                                     debtID: debtID,
                                                                     categoryID: categoryID,
                                                                     amount: amountToSubtract

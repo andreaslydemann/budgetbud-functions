@@ -12,13 +12,16 @@ module.exports = function (req, res) {
                 const debtID = String(req.query.debtID);
                 const db = admin.firestore();
 
-                db.collection("categoryDebt").where("debtID", "==", debtID)
+                db.collection("categoryDebts").where("debtID", "==", debtID)
                     .get()
                     .then((querySnapshot) => {
                         const categories = [];
 
                         querySnapshot.forEach((doc) => {
-                            categories.push(doc.data().categoryID);
+                            categories.push({
+                                categoryID: doc.data().categoryID,
+                                amount: doc.data().amount
+                            });
                         });
 
                         res.status(200).send(categories);

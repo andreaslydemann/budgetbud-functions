@@ -46,7 +46,7 @@ module.exports = function (req, res) {
 
                                 promises.push(updateCategoryPromise);
 
-                                const setCategoryDebtPromise = db.collection('categoryDebts').doc()
+                                const setCategoryDebtsPromise = db.collection('categoryDebts').doc()
                                     .set({
                                         debtID: doc.id,
                                         categoryID: categoryID,
@@ -54,7 +54,7 @@ module.exports = function (req, res) {
                                     }).catch(() => res.status(422)
                                         .send({error: 'Fejl opstod under gældsoprettelsen.'}));
 
-                                promises.push(setCategoryDebtPromise);
+                                promises.push(setCategoryDebtsPromise);
                             });
 
                             Promise.all(promises)
