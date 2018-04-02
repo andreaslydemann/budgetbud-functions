@@ -12,7 +12,6 @@ module.exports = function (req, res) {
 
                 const db = admin.firestore();
                 const budgetID = String(req.query.budgetID);
-                console.log("BudgetID: " + budgetID);
 
                 db.collection('budgets').doc(budgetID).get()
                     .then(doc => {

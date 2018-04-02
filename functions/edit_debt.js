@@ -29,20 +29,6 @@ module.exports = function (req, res) {
                     if (!doc.exists)
                         res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
-                    let sum = 0;
-                    let calcSumPromises = [];
-
-                    for (let i = 0; i < categories.length; i++) {
-                        const calcSumPromise = db.collection("categories").doc(categories[i]).get()
-                            .then((doc) => {
-                                if (!doc.exists)
-                                    return res.status(400).send({error: 'Kategori kunne ikke findes.'});
-
-                                sum += parseInt(doc.data().amount);
-                            });
-                        calcSumPromises.push(calcSumPromise);
-                    }
-
                     doc.ref.update({
                         name: name,
                         expirationDate: expirationDate,
@@ -50,75 +36,62 @@ module.exports = function (req, res) {
                         budgetID: budgetID
                     })
                         .then(() => {
-                            Promise.all(calcSumPromises)
-                                .then(() => {
-                                    const percentageToSubtract =
-                                        ((amount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+                            db.collection("categoryDebts").where("debtID", "==", debtID)
+                                .get()
+                                .then((querySnapshot) => {
+                                    let returnAmountsPromises = [];
 
-                                    if (percentageToSubtract > 100)
-                                        return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
+                                    for (let i = 0; i < querySnapshot.docs.length; i++) {
+                                        let categoryAmount = querySnapshot.docs[i].data().amount;
+                                        let categoryID = querySnapshot.docs[i].data().categoryID;
 
-                                    db.collection("categoryDebts").where("debtID", "==", debtID)
-                                        .get()
-                                        .then((querySnapshot) => {
-                                            let returnAmountsPromises = [];
-
-                                            for (let i = 0; i < querySnapshot.docs.length; i++) {
-                                                let categoryAmount = querySnapshot.docs[i].data().amount;
-                                                let categoryID = querySnapshot.docs[i].data().categoryID;
-
-                                                let returnAmountsPromise = db.collection("categories").doc(categoryID)
-                                                    .get()
-                                                    .then((doc) => {
-                                                        doc.ref.update({
-                                                            amount: (doc.data().amount + categoryAmount)
-                                                        })
-                                                            .catch(() => res.status(422)
-                                                                .send({error: 'Fejl opstod under gældsændringen.'}));
-
-                                                        querySnapshot.docs[i].ref.delete();
-                                                    });
-
-                                                returnAmountsPromises.push(returnAmountsPromise);
-                                            }
-
-                                            Promise.all(returnAmountsPromises)
-                                                .then(() => {
-                                                    let modifyAmountsPromises = [];
-
-                                                    for (let i = 0; i < categories.length; i++) {
-                                                        const categoryID = String(categories[i]);
-
-                                                        const modifyAmountsPromise = db.collection("categories").doc(categoryID)
-                                                            .get()
-                                                            .then((doc) => {
-                                                                const categoryAmount = parseInt(doc.data().amount);
-                                                                const amountToSubtract =
-                                                                    Math.round((categoryAmount / 100) * percentageToSubtract);
-
-                                                                doc.ref.update({
-                                                                    amount: (categoryAmount - amountToSubtract)
-                                                                })
-                                                                    .catch(() => res.status(422)
-                                                                        .send({error: 'Fejl opstod under gældsoprettelsen.'}));
-
-                                                                db.collection('categoryDebts').doc().set({
-                                                                    debtID: debtID,
-                                                                    categoryID: categoryID,
-                                                                    amount: amountToSubtract
-                                                                })
-                                                                    .catch(() => res.status(422)
-                                                                        .send({error: 'Fejl opstod under gældsoprettelsen.'}));
-                                                            });
-
-                                                        modifyAmountsPromises.push(modifyAmountsPromise);
-                                                    }
-
-                                                    Promise.all(modifyAmountsPromises)
-                                                        .then(() => {
-                                                            res.status(200).send({success: true});
-                                                        });
+                                        let returnAmountsPromise = db.collection("categories").doc(categoryID)
+                                            .get()
+                                            .then((doc) => {
+                                                doc.ref.update({
+                                                    amount: (doc.data().amount + categoryAmount)
                                                 })
+                                                    .catch(() => res.status(422)
+                                                        .send({error: 'Fejl opstod under gældsændringen.'}));
+
+                                                querySnapshot.docs[i].ref.delete();
+                                            });
+
+                                        returnAmountsPromises.push(returnAmountsPromise);
+                                    }
+
+                                    Promise.all(returnAmountsPromises)
+                                        .then(() => {
+                                            let promises = [];
+
+                                            categories.forEach(c => {
+                                                const categoryID = String(c.categoryID);
+                                                const amountToSubtract = parseInt(c.amountToSubtract);
+                                                const newAmount = parseInt(c.newAmount);
+
+                                                const updateCategoryPromise = db.collection("categories").doc(categoryID)
+                                                    .update({
+                                                        amount: newAmount
+                                                    }).catch(() => res.status(422)
+                                                        .send({error: 'Fejl opstod under gældsændringen.'}));
+
+                                                promises.push(updateCategoryPromise);
+
+                                                const setCategoryDebtsPromise = db.collection('categoryDebts').doc()
+                                                    .set({
+                                                        debtID: doc.id,
+                                                        categoryID: categoryID,
+                                                        amount: amountToSubtract
+                                                    }).catch(() => res.status(422)
+                                                        .send({error: 'Fejl opstod under gældsændringen.'}));
+
+                                                promises.push(setCategoryDebtsPromise);
+                                            });
+
+                                            Promise.all(promises)
+                                                .then(() => {
+                                                    res.status(200).send({success: true});
+                                                });
                                         });
                                 });
                         })
@@ -126,8 +99,7 @@ module.exports = function (req, res) {
                             .send({error: 'Kunne ikke ændre gæld.'}));
                 }).catch(() => res.status(401)
                     .send({error: 'Hentning af gæld fejlede.'}));
-            })
-            .catch(() => res.status(401)
-                .send({error: "Brugeren kunne ikke verificeres."}));
+            }).catch(() => res.status(401)
+            .send({error: "Brugeren kunne ikke verificeres."}));
     })
 };
