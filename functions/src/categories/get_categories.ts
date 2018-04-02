@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -17,7 +17,7 @@ module.exports = function (req, res) {
                     .where("budgetID", "==", budgetID)
                     .get()
                     .then((querySnapshot) => {
-                        let categoryArray = [];
+                        const categoryArray = [];
 
                         querySnapshot.forEach((doc) => {
                             categoryArray.push({id: doc.id, categoryData: doc.data()});

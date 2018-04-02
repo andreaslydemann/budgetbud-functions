@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -15,8 +15,8 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
                 const budgetRef = db.collection('budgets').doc(budgetID);
 
-                budgetRef.get().then((doc) => {
-                    if (doc.exists) {
+                budgetRef.get().then((budgetDoc) => {
+                    if (budgetDoc.exists) {
                         budgetRef.delete()
                             .then(() => {
                                 db.collection("categories").where("budgetID", "==", budgetID)

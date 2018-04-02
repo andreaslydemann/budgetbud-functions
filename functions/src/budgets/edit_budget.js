@@ -23,18 +23,20 @@ module.exports = function (req, res) {
                         .catch(err => res.status(422)
                             .send({error: 'Kunne ikke opdatere budget.'}));
 
-                    for (let i = 0; i < categories.length; i++) {
-                        db.collection("categories").where("budgetID", "==", budgetID)
+                    categories.forEach(categoryDoc => {
+                        db.collection("categories")
+                            .where("budgetID", "==", budgetID)
                             .get()
                             .then((doc) => {
                                 if (!doc.exists)
                                     return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+
                                 doc.ref.update({
-                                    amount: categories[i].amount
+                                    amount: categoryDoc.amount
                                 })
                             }).catch(err => res.status(422)
                             .send({error: 'Kunne ikke opdatere kategori.'}));
-                    }
+                    });
                 }).catch(err => res.status(401).send({error: err}));
         }
     )

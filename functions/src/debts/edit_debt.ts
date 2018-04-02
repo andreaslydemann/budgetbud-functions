@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -25,11 +25,11 @@ module.exports = function (req, res) {
 
                 const db = admin.firestore();
 
-                db.collection('debts').doc(debtID).get().then((doc) => {
-                    if (!doc.exists)
+                db.collection('debts').doc(debtID).get().then(debtDoc => {
+                    if (!debtDoc.exists)
                         res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
-                    doc.ref.update({
+                    debtDoc.ref.update({
                         name: name,
                         expirationDate: expirationDate,
                         amount: amount,
@@ -39,30 +39,30 @@ module.exports = function (req, res) {
                             db.collection("categoryDebts").where("debtID", "==", debtID)
                                 .get()
                                 .then((querySnapshot) => {
-                                    let returnAmountsPromises = [];
+                                    const returnAmountsPromises = [];
 
-                                    for (let i = 0; i < querySnapshot.docs.length; i++) {
-                                        let categoryAmount = querySnapshot.docs[i].data().amount;
-                                        let categoryID = querySnapshot.docs[i].data().categoryID;
+                                    querySnapshot.forEach(categoryDebtDoc => {
+                                        const categoryAmount = categoryDebtDoc.data().amount;
+                                        const categoryID = categoryDebtDoc.data().categoryID;
 
-                                        let returnAmountsPromise = db.collection("categories").doc(categoryID)
+                                        const returnAmountsPromise = db.collection("categories").doc(categoryID)
                                             .get()
-                                            .then((doc) => {
-                                                doc.ref.update({
-                                                    amount: (doc.data().amount + categoryAmount)
+                                            .then(categoryDoc => {
+                                                categoryDoc.ref.update({
+                                                    amount: (categoryDoc.data().amount + categoryAmount)
                                                 })
                                                     .catch(() => res.status(422)
                                                         .send({error: 'Fejl opstod under gældsændringen.'}));
 
-                                                querySnapshot.docs[i].ref.delete();
+                                                categoryDebtDoc.ref.delete();
                                             });
 
                                         returnAmountsPromises.push(returnAmountsPromise);
-                                    }
+                                    });
 
                                     Promise.all(returnAmountsPromises)
                                         .then(() => {
-                                            let promises = [];
+                                            const promises = [];
 
                                             categories.forEach(c => {
                                                 const categoryID = String(c.categoryID);
@@ -79,7 +79,7 @@ module.exports = function (req, res) {
 
                                                 const setCategoryDebtsPromise = db.collection('categoryDebts').doc()
                                                     .set({
-                                                        debtID: doc.id,
+                                                        debtID: debtDoc.id,
                                                         categoryID: categoryID,
                                                         amount: amountToSubtract
                                                     }).catch(() => res.status(422)

@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -23,10 +23,10 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
 
                 let sum = 0;
-                let calcSumPromises = [];
+                const calcSumPromises = [];
 
-                for (let i = 0; i < categories.length; i++) {
-                    const calcSumPromise = db.collection("categories").doc(categories[i]).get()
+                categories.forEach(categoryDoc => {
+                    const calcSumPromise = db.collection("categories").doc(categoryDoc).get()
                         .then((doc) => {
                             if (!doc.exists)
                                 return res.status(400).send({error: 'Kategori kunne ikke findes.'});
@@ -35,7 +35,7 @@ module.exports = function (req, res) {
                         });
 
                     calcSumPromises.push(calcSumPromise);
-                }
+                });
 
                 Promise.all(calcSumPromises)
                     .then(() => {
@@ -45,11 +45,11 @@ module.exports = function (req, res) {
                         if (percentageToSubtract > 100)
                             return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
 
-                        let modifyAmountsPromises = [];
-                        let subtractionsArray = [];
+                        const modifyAmountsPromises = [];
+                        const subtractionsArray = [];
 
-                        for (let i = 0; i < categories.length; i++) {
-                            const categoryID = String(categories[i]);
+                        categories.forEach(categoryDoc => {
+                            const categoryID = String(categoryDoc);
 
                             const modifyAmountsPromise = db.collection("categories").doc(categoryID)
                                 .get()
@@ -62,7 +62,7 @@ module.exports = function (req, res) {
                                 });
 
                             modifyAmountsPromises.push(modifyAmountsPromise);
-                        }
+                        });
 
                         Promise.all(modifyAmountsPromises)
                             .then(() => {

@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -7,18 +7,18 @@ module.exports = function (req, res) {
 
         db.collection("debts")
             .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach(debtDoc => {
-                    if (Date.now() <= new Date(debtDoc.data().expirationDate)) {
+            .then(debts => {
+                debts.forEach(debtDoc => {
+                    if (new Date() <= new Date(debtDoc.data().expirationDate)) {
                         db.collection("categoryDebts")
                             .where("debtID", "==", debtDoc.id)
                             .get()
-                            .then((querySnapshot) => {
-                                let returnAmountsPromises = [];
+                            .then((categoryDebts) => {
+                                const returnAmountsPromises = [];
 
-                                querySnapshot.forEach(doc => {
-                                    let categoryAmount = doc.data().amount;
-                                    let categoryID = doc.data().categoryID;
+                                categoryDebts.forEach(categoryDebtDoc => {
+                                    const categoryAmount = categoryDebtDoc.data().amount;
+                                    const categoryID = categoryDebtDoc.data().categoryID;
 
                                     const returnAmountsPromise = db.collection("categories").doc(categoryID)
                                         .get()

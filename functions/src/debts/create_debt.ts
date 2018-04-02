@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -31,7 +31,7 @@ module.exports = function (req, res) {
                     budgetID: budgetID
                 })
                     .then(doc => {
-                        let promises = [];
+                        const promises = [];
 
                         categories.forEach(c => {
                             const categoryID = String(c.categoryID);

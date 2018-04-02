@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -18,7 +18,7 @@ module.exports = function (req, res) {
                     .where("budgetID", "==", budgetID)
                     .get()
                     .then((querySnapshot) => {
-                        let debtArray = [];
+                        const debtArray = [];
 
                         querySnapshot.forEach((doc) => {
                             const data = doc.data();

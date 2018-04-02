@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -18,7 +18,7 @@ module.exports = function (req, res) {
                 const categories = req.body.categories;
 
                 // Create a new budget using the income and category
-                let budgetRef = db.collection('budgets').doc();
+                const budgetRef = db.collection('budgets').doc();
                 budgetRef.set({
                     userID,
                     income,
@@ -31,9 +31,9 @@ module.exports = function (req, res) {
 
                 const  budgetID = budgetRef.id;
 
-                for (let i = 0; i < categories.length; i++) {
-                    let categoryName = String(categories[i].name);
-                    let categoryAmount = String(categories[i].amount);
+                categories.forEach(categoryDoc => {
+                    const categoryName = String(categoryDoc.name);
+                    const categoryAmount = String(categoryDoc.amount);
                     db.collection('categories').doc().set({
                         name: categoryName,
                         amount: categoryAmount,
@@ -42,7 +42,7 @@ module.exports = function (req, res) {
                         .then(() => res.status(200).send({success: true}))
                         .catch(err => res.status(422)
                             .send({error: 'Kunne ikke oprette kategori.'}));
-                }
+                });
             })
             .catch(err => res.status(401).send({error: err}));
     })

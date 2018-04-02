@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const crypto = require('crypto');
 
 module.exports = function (req, res) {
@@ -17,14 +17,14 @@ module.exports = function (req, res) {
             const ref = db.collection("users").doc(cprNumber);
 
             ref.get()
-                .then((doc) => {
-                    if (!doc.exists)
+                .then((userDoc) => {
+                    if (!userDoc.exists)
                         return res.status(400).send({error: 'Bruger er ikke registreret.'});
 
-                    const hash = crypto.pbkdf2Sync(code, doc.data().codeSalt,
+                    const hash = crypto.pbkdf2Sync(code, userDoc.data().codeSalt,
                         10000, 128, 'sha512').toString('hex');
 
-                    if (doc.data().codeHash !== hash) {
+                    if (userDoc.data().codeHash !== hash) {
                         ref.get().then(doc => {
                             const failedSignIns = doc.data().failedSignIns + 1;
 

@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const crypto = require('crypto');
 const twilio = require('../config/twilio');
 

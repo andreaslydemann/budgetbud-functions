@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -14,8 +14,8 @@ module.exports = function (req, res) {
 
                 db.collection('debts').doc(debtID)
                     .get()
-                    .then((doc) => {
-                        if (!doc.exists)
+                    .then(debtDoc => {
+                        if (!debtDoc.exists)
                             res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
                         db.collection("debts").doc(debtID).delete()
@@ -24,26 +24,26 @@ module.exports = function (req, res) {
                                     .where("debtID", "==", debtID)
                                     .get()
                                     .then((querySnapshot) => {
-                                        let returnAmountsPromises = [];
+                                        const returnAmountsPromises = [];
 
-                                        for (let i = 0; i < querySnapshot.docs.length; i++) {
-                                            let categoryAmount = querySnapshot.docs[i].data().amount;
-                                            let categoryID = querySnapshot.docs[i].data().categoryID;
+                                        querySnapshot.forEach(categoryDebtDoc => {
+                                            const categoryAmount = categoryDebtDoc.data().amount;
+                                            const categoryID = categoryDebtDoc.data().categoryID;
 
-                                            let returnAmountsPromise = db.collection("categories").doc(categoryID)
+                                            const returnAmountsPromise = db.collection("categories").doc(categoryID)
                                                 .get()
-                                                .then((doc) => {
-                                                    doc.ref.update({
-                                                        amount: (doc.data().amount + categoryAmount)
+                                                .then(categoryDoc => {
+                                                    categoryDoc.ref.update({
+                                                        amount: (categoryDoc.data().amount + categoryAmount)
                                                     })
                                                         .catch(() => res.status(422)
                                                             .send({error: 'Fejl opstod under gældssletningen.'}));
 
-                                                    querySnapshot.docs[i].ref.delete();
+                                                    categoryDebtDoc.ref.delete();
                                                 });
 
                                             returnAmountsPromises.push(returnAmountsPromise);
-                                        }
+                                        });
 
                                         Promise.all(returnAmountsPromises)
                                             .then(() => {
