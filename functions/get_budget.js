@@ -16,9 +16,9 @@ module.exports = function (req, res) {
 
                 db.collection('budgets').doc(budgetID).get()
                     .then(doc => {
-                            if (!doc.exists) {
+                            if (!doc.exists)
                                 return res.status(400).send({error: 'Budgettet eksisterer ikke.'});
-                            }
+
                             res.status(200).send({budgetData: doc.data()});
                         }
                     )
