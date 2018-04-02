@@ -20,8 +20,7 @@ module.exports = function (req, res) {
                         let categoryArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            if (doc.data().amount > 0)
-                                categoryArray.push({id: doc.id, categoryData: doc.data()});
+                            categoryArray.push({id: doc.id, categoryData: doc.data()});
                         });
 
                         res.status(200).send(categoryArray);
