@@ -14,7 +14,8 @@ module.exports = function (req, res) {
                 const budgetID = String(req.query.budgetID);
                 const db = admin.firestore();
 
-                db.collection("debts").where("budgetID", "==", budgetID)
+                db.collection("debts")
+                    .where("budgetID", "==", budgetID)
                     .get()
                     .then((querySnapshot) => {
                         let debtArray = [];

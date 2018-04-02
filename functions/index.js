@@ -18,6 +18,7 @@ const getDebts = require('./get_debts');
 const createDebt = require('./create_debt');
 const editDebt = require('./edit_debt');
 const deleteDebt = require('./delete_debt');
+const deleteExpiredDebts = require('./delete_expired_debts');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -47,3 +48,4 @@ exports.getDebts = functions.https.onRequest(getDebts);
 exports.createDebt = functions.https.onRequest(createDebt);
 exports.editDebt = functions.https.onRequest(editDebt);
 exports.deleteDebt = functions.https.onRequest(deleteDebt);
+exports.deleteExpiredDebts = functions.https.onRequest(deleteExpiredDebts);

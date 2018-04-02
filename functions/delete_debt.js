@@ -4,7 +4,6 @@ const cors = require('cors')({origin: true});
 module.exports = function (req, res) {
     cors(req, res, () => {
         const token = req.get('Authorization').split('Bearer ')[1];
-
         admin.auth().verifyIdToken(token)
             .then(() => {
                 if (!req.body.debtID)
@@ -21,7 +20,8 @@ module.exports = function (req, res) {
 
                         db.collection("debts").doc(debtID).delete()
                             .then(() => {
-                                db.collection("categoryDebts").where("debtID", "==", debtID)
+                                db.collection("categoryDebts")
+                                    .where("debtID", "==", debtID)
                                     .get()
                                     .then((querySnapshot) => {
                                         let returnAmountsPromises = [];
@@ -37,7 +37,7 @@ module.exports = function (req, res) {
                                                         amount: (doc.data().amount + categoryAmount)
                                                     })
                                                         .catch(() => res.status(422)
-                                                            .send({error: 'Fejl opstod under gældsændringen.'}));
+                                                            .send({error: 'Fejl opstod under gældssletningen.'}));
 
                                                     querySnapshot.docs[i].ref.delete();
                                                 });
@@ -55,8 +55,7 @@ module.exports = function (req, res) {
                                 .send({error: 'Sletning af gælden fejlede.'}));
                     }).catch(() => res.status(401)
                     .send({error: 'Hentning af gæld fejlede.'}));
-            })
-            .catch(() => res.status(401)
+            }).catch(() => res.status(401)
                 .send({error: "Brugeren kunne ikke verificeres."}));
     });
 };
