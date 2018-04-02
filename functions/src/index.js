@@ -1,24 +1,24 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const serviceAccount = require('./config/service_account.json');
+const serviceAccount = require('./config/service_account');
 
-const requestCode = require('./request_code');
-const verifyCode = require('./verify_code');
-const createUser = require('./create_user');
-const deleteUser = require('./delete_user');
-const getBudgetID = require('./get_budget_id');
-const getBudget = require('./get_budget');
-const createBudget = require('./create_budget');
-const editBudget = require('./edit_budget');
-const deleteBudget = require('./delete_budget');
-const getCategories = require('./get_categories');
-const getCategoriesOfDebt = require('./get_categories_of_debt');
-const calculateCategorySubtractions = require('./calculate_category_subtractions');
-const getDebts = require('./get_debts');
-const createDebt = require('./create_debt');
-const editDebt = require('./edit_debt');
-const deleteDebt = require('./delete_debt');
-const deleteExpiredDebts = require('./delete_expired_debts');
+const requestCode = require('./authentication/request_code');
+const verifyCode = require('./authentication/verify_code');
+const createUser = require('./authentication/create_user');
+const deleteUser = require('./authentication/delete_user');
+const getBudgetID = require('./budgets/get_budget_id');
+const getBudget = require('./budgets/get_budget');
+const createBudget = require('./budgets/create_budget');
+const editBudget = require('./budgets/edit_budget');
+const deleteBudget = require('./budgets/delete_budget');
+const getCategories = require('./categories/get_categories');
+const getCategoriesOfDebt = require('./categories/get_categories_of_debt');
+const calculateCategorySubtractions = require('./categories/calculate_category_subtractions');
+const getDebts = require('./debts/get_debts');
+const createDebt = require('./debts/create_debt');
+const editDebt = require('./debts/edit_debt');
+const deleteDebt = require('./debts/delete_debt');
+const deleteExpiredDebts = require('./debts/delete_expired_debts');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

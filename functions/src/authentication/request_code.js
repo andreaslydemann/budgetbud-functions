@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 const crypto = require('crypto');
-const twilio = require('./config/twilio');
+const twilio = require('../config/twilio');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber)

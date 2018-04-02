@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
-const dateHelper = require('./helpers/date_helper');
+const dateHelper = require('../helpers/date_helper');
 
 module.exports = function (req, res) {
     cors(req, res, () => {
