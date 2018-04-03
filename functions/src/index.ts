@@ -19,7 +19,7 @@ const createDebt = require('./debts/create_debt');
 const editDebt = require('./debts/edit_debt');
 const deleteDebt = require('./debts/delete_debt');
 const deleteExpiredDebts = require('./debts/delete_expired_debts');
-const linkAccount = require('./accounts/linkAccount');
+const linkAccounts = require('./accounts/linkAccounts');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -52,4 +52,5 @@ exports.deleteDebt = functions.https.onRequest(deleteDebt);
 exports.deleteExpiredDebts = functions.https.onRequest(deleteExpiredDebts);
 
 // ----------ACCOUNT RELATED FUNCTIONS----------
-exports.linkAccount = functions.https.onRequest(linkAccount);
+exports.linkAccounts = functions.https.onRequest(linkAccounts);
+
