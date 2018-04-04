@@ -8,7 +8,7 @@ module.exports = function (req, res) {
             .then(() => {
                 // Verify that the user provided an income
                 if (!req.body.income || !req.body.userID || !req.body.categories)
-                    return res.status(422).send({error: 'Fejl i indtastningen.'});
+                    return res.status(422).send({error: 'Fejl i indtastning.'});
 
                 const db = admin.firestore();
                 const userID = String(req.body.userID);

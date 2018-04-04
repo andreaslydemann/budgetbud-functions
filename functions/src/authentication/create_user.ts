@@ -2,7 +2,7 @@ import admin = require('firebase-admin');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber)
-        return res.status(422).send({error: 'Forkert indtastning.'});
+        return res.status(422).send({error: 'Fejl i indtastning.'});
 
     // Format to remove dashes and parentheses
     const cprNumber = String(req.body.cprNumber);

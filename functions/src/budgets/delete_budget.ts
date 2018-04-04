@@ -8,7 +8,7 @@ module.exports = function (req, res) {
         admin.auth().verifyIdToken(token)
             .then(() => {
                 if (!req.body.budgetID)
-                    return res.status(400).send({error: 'Intet gæld er angivet.'});
+                    return res.status(400).send({error: 'Intet budgetID angivet.'});
 
                 const budgetID = String(req.body.budgetID);
 
