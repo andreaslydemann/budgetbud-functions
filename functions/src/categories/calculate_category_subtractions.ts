@@ -25,8 +25,8 @@ module.exports = function (req, res) {
                 let sum = 0;
                 const calcSumPromises = [];
 
-                categories.forEach(categoryDoc => {
-                    const calcSumPromise = db.collection("categories").doc(categoryDoc).get()
+                categories.forEach(category => {
+                    const calcSumPromise = db.collection("categories").doc(category.categoryID).get()
                         .then((doc) => {
                             if (!doc.exists)
                                 return res.status(400).send({error: 'Kategori kunne ikke findes.'});
@@ -48,8 +48,8 @@ module.exports = function (req, res) {
                         const modifyAmountsPromises = [];
                         const subtractionsArray = [];
 
-                        categories.forEach(categoryDoc => {
-                            const categoryID = String(categoryDoc);
+                        categories.forEach(category => {
+                            const categoryID = String(category);
 
                             const modifyAmountsPromise = db.collection("categories").doc(categoryID)
                                 .get()
