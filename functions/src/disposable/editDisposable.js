@@ -8,7 +8,7 @@ module.exports = function (req, res) {
         admin.auth().verifyIdToken(token)
             .then(() => {
                 if (!req.body.amount || !req.body.budgetID)
-                    return res.status(422).send({error: 'Fejl i indtastning.'});
+                    return res.status(422).send({error: 'Fejl i anmodningen.'});
 
                 if (!req.body.categories || req.body.categories.length === 0)
                     return res.status(422).send({error: 'Ingen kategorier valgt.'});
