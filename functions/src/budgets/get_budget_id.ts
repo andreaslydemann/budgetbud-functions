@@ -19,11 +19,11 @@ module.exports = function (req, res) {
                         querySnapshot.forEach(function(doc) {
                             res.status(200).send({id: doc.id})
                                 .catch(() => res.status(422)
-                                    .send({error: 'Hentning af et budget fejlede.'}));
+                                    .send({error: 'Hentning af budgetID fejlede.'}));
                         });
                     })
                     .catch(function(error) {
-                        console.log("Kunne finde budgettet: ", error);
+                        console.log("Kunne ikke finde budgettet: ", error);
                     });
             })
             .catch(err => res.status(401).send({error: err}));
