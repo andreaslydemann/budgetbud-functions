@@ -9,7 +9,7 @@ module.exports = function (req, res) {
             .then(() => {
                 // Verify that the user provided an income
                 if (!req.body.eBankingAccIDs || !req.body.userID)
-                    return res.status(422).send({error: 'Fejl i indtastningen.'});
+                    return res.status(422).send({error: 'Fejl i anmodningen.'});
 
                 const db = admin.firestore();
                 const userID = String(req.body.userID);

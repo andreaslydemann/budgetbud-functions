@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -13,9 +14,11 @@ module.exports = function (req, res) {
                     .get()
                     .then((querySnapshot) => {
                         const categoryTypeArray = [];
+
                         querySnapshot.forEach((doc) => {
-                            categoryTypeArray.push({doc.data()});
+                            categoryTypeArray.push(doc.data().name);
                         });
+
                         res.status(200).send(categoryTypeArray);
                     })
                     .catch(() => res.status(422).send({error: 'Kunne ikke hente kategorityper.'}));
