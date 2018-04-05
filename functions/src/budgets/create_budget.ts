@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -29,20 +30,22 @@ module.exports = function (req, res) {
                     .catch(err => res.status(422)
                         .send({error: 'Kunne ikke oprette budget.'}));
 
-                const  budgetID = budgetRef.id;
+                const budgetID = budgetRef.id;
 
                 categories.forEach(categoryDoc => {
                     const categoryName = String(categoryDoc.name);
-                    const categoryAmount = String(categoryDoc.amount);
-                    db.collection('categories').doc().set({
-                        name: categoryName,
-                        amount: categoryAmount,
-                        budgetID
-                    })
-                        .then(() => res.status(200).send({success: true}))
-                        .catch(err => res.status(422)
-                            .send({error: 'Kunne ikke oprette kategori.'}));
-                });
+                    const categoryAmount = parseInt(categoryDoc.amount);
+                    if (categoryAmount > 0) {
+                        db.collection('categories').doc().set({
+                            name: categoryName,
+                            amount: categoryAmount,
+                            budgetID
+                        })
+                            .then(() => res.status(200).send({success: true}))
+                            .catch(err => res.status(422)
+                                .send({error: 'Kunne ikke oprette kategori.'}));
+                    }
+                })
             })
             .catch(err => res.status(401).send({error: err}));
     })
