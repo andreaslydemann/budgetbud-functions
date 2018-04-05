@@ -21,9 +21,7 @@ module.exports = function (req, res) {
                             res.status(200).send({budgetData: doc.data()});
                         }
                     )
-                    .catch(function (error) {
-                        console.log("Kunne ikke hente budgettet: ", error);
-                    })
+                    .catch(() => res.status(422).send({error: "Kunne ikke finde budgettet."}));
             })
             .catch(err => res.status(401).send({error: err}));
     })
