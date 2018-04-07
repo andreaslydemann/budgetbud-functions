@@ -16,7 +16,7 @@ module.exports = function (req, res) {
                         const categoryTypeArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            categoryTypeArray.push(doc.data().name);
+                            categoryTypeArray.push({id: doc.id, name: doc.data().name});
                         });
 
                         res.status(200).send(categoryTypeArray);

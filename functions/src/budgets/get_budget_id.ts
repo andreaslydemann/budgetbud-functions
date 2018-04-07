@@ -1,5 +1,4 @@
 import admin = require('firebase-admin');
-
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
