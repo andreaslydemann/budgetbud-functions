@@ -8,39 +8,28 @@ module.exports = function (req, res) {
         admin.auth().verifyIdToken(token)
             .then(() => {
                 // Verify that the user provided an data
-                if (!req.body.income || !req.body.categories)
-                    return res.status(422).send({error: 'Fejl i indtastning.'});
+                if (!req.body.income ||
+                    !req.body.categories ||
+                    !req.body.disposable ||
+                    !req.body.totalGoalsAmount)
+                    return res.status(422).send({error: 'Fejl i anmodningen.'});
 
                 const db = admin.firestore();
                 const budgetID = String(req.body.budgetID);
                 const income = String(req.body.income);
-                const categories = req.body.categories;
+                const disposable = String(req.body.disposable);
+                const totalGoalsAmount = String(req.body.totalGoalsAmount);
 
                 // Update a budget using the income and category
                 db.collection('budgets').doc(budgetID).update({
-                    income: income
+                    income,
+                    disposable,
+                    totalGoalsAmount
                 })
                     .then(() => res.status(200).send({success: true}))
                     .catch(err => res.status(422)
                         .send({error: 'Kunne ikke opdatere budget.'}));
-
-                categories.forEach(categoryDoc => {
-                    db.collection("categories")
-                        .where("budgetID", "==", budgetID)
-                        .get()
-                        .then((querySnapshot) => {
-                            querySnapshot.forEach(category => {
-                                category.ref.update({
-                                    amount: categoryDoc.amount
-                                })
-                                    .then(() => res.status(200).send({success: true}))
-                                    .catch(err => res.status(422)
-                                        .send({error: 'Kunne ikke opdatere kategori.'}));
-                            })
-
-                        });
-                })
-                    .catch(err => res.status(401).send({error: err}));
             })
+            .catch(err => res.status(401).send({error: err}));
     })
 };

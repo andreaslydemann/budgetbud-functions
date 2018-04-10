@@ -14,24 +14,31 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
                 const categories = req.body.categories;
                 const budgetID = String(req.body.budgetID);
+                const categoryID = String(req.body.categoryID);
+
+                const categoriesCollection = db.collection("categories");
 
                 categories.forEach(categoryDoc => {
-                    db.collection("categories")
-                        .where("budgetID", "==", budgetID)
-                        .get()
-                        .then((querySnapshot) => {
-                            querySnapshot.forEach(category => {
-                                category.ref.update({
+                    categoriesCollection.doc(categoryID).get()
+                        .then(doc => {
+                            if (!doc.exists) {
+                                doc.update({
                                     amount: categoryDoc.amount
                                 })
-                                    .then(() => res.status(200).send({success: true}))
-                                    .catch(err => res.status(422)
-                                        .send({error: 'Kunne ikke opdatere kategori.'}));
-                            })
-
-                        });
-                })
+                            }
+                            else {
+                                categoriesCollection.doc().set({
+                                    categoryTypeID: categoryDoc.categoryTypeID,
+                                    amount: categoryDoc.amount,
+                                    budgetID
+                                })
+                            }
+                        })
+                        .then(() => res.status(200).send({success: true}))
+                        .catch(err => res.status(422)
+                            .send({error: 'Kunne ikke opdatere kategori.'}));
+                });
             })
-        .catch(err => res.status(401).send({error: err}));
     })
+    .catch(err => res.status(401).send({error: err}));
 };

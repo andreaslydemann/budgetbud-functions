@@ -14,7 +14,7 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
                 const userID = String(req.body.userID);
                 const income = String(req.body.income);
-                const totalExpenses = String(req.body.totalExpenses);
+                const totalGoalsAmount = String(req.body.totalGoalsAmount);
                 const disposable = String(req.body.disposable);
 
                 // Create a new budget
@@ -22,7 +22,7 @@ module.exports = function (req, res) {
                 budgetRef.set({
                     userID,
                     income,
-                    totalExpenses,
+                    totalGoalsAmount,
                     disposable
                 })
                     .then(() => res.status(200).send({id: budgetRef.id, success: true}))
