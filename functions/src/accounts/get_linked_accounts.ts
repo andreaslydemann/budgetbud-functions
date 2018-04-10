@@ -13,7 +13,7 @@ module.exports = function (req, res) {
                 const userID = String(req.query.userID);
                 const db = admin.firestore();
 
-                db.collection("accounts")
+                db.collection("linkedAccounts")
                     .where("userID", "==", userID)
                     .get()
                     .then((querySnapshot) => {
