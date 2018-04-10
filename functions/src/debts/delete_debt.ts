@@ -1,61 +1,73 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
-    cors(req, res, () => {
+    cors(req, res, async () => {
         const token = req.get('Authorization').split('Bearer ')[1];
-        admin.auth().verifyIdToken(token)
-            .then(() => {
-                if (!req.body.debtID)
-                    return res.status(400).send({error: 'Intet gæld er angivet.'});
+        try {
+            await admin.auth().verifyIdToken(token);
+        } catch (err) {
+            res.status(401).send({error: "Brugeren kunne ikke verificeres."})
+        }
 
-                const debtID = String(req.body.debtID);
-                const db = admin.firestore();
+        if (!req.body.debtID)
+            return res.status(400).send({error: 'Intet gæld er angivet.'});
 
-                db.collection('debts').doc(debtID)
-                    .get()
-                    .then(debtDoc => {
-                        if (!debtDoc.exists)
-                            res.status(422).send({error: 'Gæld kunne ikke findes.'});
+        const debtID = String(req.body.debtID);
+        const db = admin.firestore();
 
-                        db.collection("debts").doc(debtID).delete()
-                            .then(() => {
-                                db.collection("categoryDebts")
-                                    .where("debtID", "==", debtID)
-                                    .get()
-                                    .then((querySnapshot) => {
-                                        const returnAmountsPromises = [];
+        let debtDoc;
+        let querySnapshot;
+        try {
+            debtDoc = await db.collection('debts').doc(debtID).get();
 
-                                        querySnapshot.forEach(categoryDebtDoc => {
-                                            const categoryAmount = categoryDebtDoc.data().amount;
-                                            const categoryID = categoryDebtDoc.data().categoryID;
+            if (!debtDoc.exists)
+                res.status(422).send({error: 'Gæld kunne ikke findes.'});
 
-                                            const returnAmountsPromise = db.collection("categories").doc(categoryID)
-                                                .get()
-                                                .then(categoryDoc => {
-                                                    categoryDoc.ref.update({
-                                                        amount: (categoryDoc.data().amount + categoryAmount)
-                                                    })
-                                                        .catch(() => res.status(422)
-                                                            .send({error: 'Fejl opstod under gældssletningen.'}));
+            await db.collection("debts").doc(debtID).delete();
 
-                                                    categoryDebtDoc.ref.delete();
-                                                });
+            querySnapshot = await db.collection("categoryDebts")
+                .where("debtID", "==", debtID)
+                .get();
+        } catch (err) {
+            res.status(401).send({error: 'Sletning af gæld fejlede.'})
+        }
 
-                                            returnAmountsPromises.push(returnAmountsPromise);
-                                        });
+        const promises = [];
 
-                                        Promise.all(returnAmountsPromises)
-                                            .then(() => {
-                                                res.status(200).send({success: true});
-                                            });
-                                    });
-                            })
-                            .catch(() => res.status(422)
-                                .send({error: 'Sletning af gælden fejlede.'}));
-                    }).catch(() => res.status(401)
-                    .send({error: 'Hentning af gæld fejlede.'}));
-            }).catch(() => res.status(401)
-                .send({error: "Brugeren kunne ikke verificeres."}));
+        try {
+            const budgetDoc = await db.collection("budgets").doc(debtDoc.data().budgetID).get();
+            const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
+                totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + debtDoc.data().amountPerMonth),
+                disposable: (budgetDoc.data().disposable - debtDoc.data().amountPerMonth)
+            });
+
+            promises.push(updateTotalGoalsAmountPromise);
+        } catch (err) {
+            res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
+        }
+
+        querySnapshot.forEach(categoryDebtDoc => {
+            const categoryAmount = categoryDebtDoc.data().amount;
+            const categoryID = categoryDebtDoc.data().categoryID;
+
+            const returnAmountsPromise = db.collection("categories").doc(categoryID)
+                .get()
+                .then(categoryDoc => {
+                    categoryDoc.ref.update({
+                        amount: (categoryDoc.data().amount + categoryAmount)
+                    })
+                        .catch(() => res.status(422)
+                            .send({error: 'Fejl opstod under gældssletningen.'}));
+
+                    categoryDebtDoc.ref.delete();
+                });
+
+            promises.push(returnAmountsPromise);
+        });
+
+        await Promise.all(promises);
+        res.status(200).send({success: true});
     });
 };

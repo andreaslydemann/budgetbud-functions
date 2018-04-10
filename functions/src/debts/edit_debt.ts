@@ -1,5 +1,4 @@
 import admin = require('firebase-admin');
-
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -22,12 +21,12 @@ module.exports = function (req, res) {
             return res.status(422).send({error: 'Ingen kategorier valgt.'});
 
         const name = String(req.body.name);
-        const amount = parseInt(req.body.amount);
+        const totalAmount = parseInt(req.body.amount);
         const expirationDate = dateHelper.toDate(req.body.expirationDate);
+        const amountPerMonth = (totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
         const budgetID = String(req.body.budgetID);
         const debtID = String(req.body.debtID);
         const categories = req.body.categories;
-
         const db = admin.firestore();
 
         let debtDoc;
@@ -40,8 +39,9 @@ module.exports = function (req, res) {
 
             await debtDoc.ref.update({
                 name: name,
+                totalAmount: totalAmount,
+                amountPerMonth: amountPerMonth,
                 expirationDate: expirationDate,
-                amount: amount,
                 budgetID: budgetID
             });
 
@@ -74,7 +74,19 @@ module.exports = function (req, res) {
         });
 
         await Promise.all(returnAmountsPromises);
-        const promises = [];
+        const updatePromises = [];
+
+        try {
+            const budgetDoc = await db.collection("budgets").doc(budgetID).get();
+            const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
+                totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + amountPerMonth),
+                disposable: (budgetDoc.data().disposable - amountPerMonth)
+            });
+
+            updatePromises.push(updateTotalGoalsAmountPromise);
+        } catch (err) {
+            res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
+        }
 
         categories.forEach(c => {
             const categoryID = String(c.categoryID);
@@ -87,7 +99,7 @@ module.exports = function (req, res) {
                 }).catch(() => res.status(422)
                     .send({error: 'Fejl opstod under gældsændringen.'}));
 
-            promises.push(updateCategoryPromise);
+            updatePromises.push(updateCategoryPromise);
 
             const setCategoryDebtsPromise = db.collection('categoryDebts').doc()
                 .set({
@@ -97,19 +109,10 @@ module.exports = function (req, res) {
                 }).catch(() => res.status(422)
                     .send({error: 'Fejl opstod under gældsændringen.'}));
 
-            promises.push(setCategoryDebtsPromise);
+            updatePromises.push(setCategoryDebtsPromise);
         });
 
-        /*
-        const updateTotalGoalsAmountPromise = db.collection("budgets").doc(budgetID)
-            .update({
-                totalGoalsAmount: amount
-            }).catch(() => res.status(422)
-                .send({error: 'Fejl opstod under gældsændringen.'}));
-
-        promises.push(updateTotalGoalsAmountPromise);*/
-
-        await Promise.all(promises);
+        await Promise.all(updatePromises);
         res.status(200).send({success: true});
     })
 };

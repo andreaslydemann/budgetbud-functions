@@ -1,84 +1,86 @@
 import admin = require('firebase-admin');
-
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
 module.exports = function (req, res) {
-    cors(req, res, () => {
+    cors(req, res, async () => {
         const token = req.get('Authorization').split('Bearer ')[1];
-        admin.auth().verifyIdToken(token)
-            .then(() => {
-                if (!req.body.name || !req.body.amount || !req.body.budgetID)
-                    return res.status(422).send({error: 'Fejl i indtastning.'});
+        try {
+            await admin.auth().verifyIdToken(token);
+        } catch (err) {
+            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+        }
 
-                if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
-                    return res.status(422).send({error: 'Ugyldig udløbsdato.'});
+        if (!req.body.name || !req.body.amount || !req.body.budgetID)
+            return res.status(422).send({error: 'Fejl i indtastning.'});
 
-                if (!req.body.categories || req.body.categories.length === 0)
-                    return res.status(422).send({error: 'Ingen kategorier valgt.'});
+        if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
+            return res.status(422).send({error: 'Ugyldig udløbsdato.'});
 
-                const name = String(req.body.name);
-                const amount = parseInt(req.body.amount);
-                const budgetID = String(req.body.budgetID);
-                const expirationDate = dateHelper.toDate(req.body.expirationDate);
-                const categories = req.body.categories;
+        if (!req.body.categories || req.body.categories.length === 0)
+            return res.status(422).send({error: 'Ingen kategorier valgt.'});
 
-                const db = admin.firestore();
+        const name = String(req.body.name);
+        const totalAmount = parseInt(req.body.amount);
+        const budgetID = String(req.body.budgetID);
+        const expirationDate = dateHelper.toDate(req.body.expirationDate);
+        const amountPerMonth = (totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
+        const categories = req.body.categories;
+        const db = admin.firestore();
 
-                db.collection('debts').add({
-                    name: name,
-                    amount: amount,
-                    expirationDate: expirationDate,
-                    budgetID: budgetID
-                })
-                    .then(doc => {
-                        const promises = [];
+        let debtDoc;
 
-                        categories.forEach(c => {
-                            const categoryID = String(c.categoryID);
-                            const amountToSubtract = parseInt(c.amountToSubtract);
-                            const newAmount = parseInt(c.newAmount);
+        try {
+            debtDoc = await db.collection('debts').add({
+                name: name,
+                totalAmount: totalAmount,
+                amountPerMonth: amountPerMonth,
+                expirationDate: expirationDate,
+                budgetID: budgetID
+            });
+        } catch (err) {
+            res.status(422).send({error: "Gæld kunne ikke oprettes."})
+        }
 
-                            const updateCategoryPromise = db.collection("categories").doc(categoryID)
-                                .update({
-                                    amount: newAmount
-                                }).catch(() => res.status(422)
-                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+        const updatePromises = [];
 
-                            promises.push(updateCategoryPromise);
+        try {
+            const budgetDoc = await db.collection("budgets").doc(budgetID).get();
+            const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
+                totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + amountPerMonth),
+                disposable: (budgetDoc.data().disposable - amountPerMonth)
+            });
 
-                            const setCategoryDebtsPromise = db.collection('categoryDebts').doc()
-                                .set({
-                                    debtID: doc.id,
-                                    categoryID: categoryID,
-                                    amount: amountToSubtract
-                                }).catch(() => res.status(422)
-                                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+            updatePromises.push(updateTotalGoalsAmountPromise);
+        } catch (err) {
+            res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
+        }
 
-                            promises.push(setCategoryDebtsPromise);
-                        });
-/*
-                        db.collection("budgets").doc(budgetID)
-                            .get()
-                            .then(budgetDoc => {
-                                const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
-                                    totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + amount)
-                                })
-                                    .catch(() => res.status(422)
-                                        .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+        categories.forEach(c => {
+            const categoryID = String(c.categoryID);
+            const amountToSubtract = parseInt(c.amountToSubtract);
+            const newAmount = parseInt(c.newAmount);
 
-                                promises.push(updateTotalGoalsAmountPromise);
-                            });*/
+            const updateCategoryPromise = db.collection("categories").doc(categoryID)
+                .update({
+                    amount: newAmount
+                }).catch(() => res.status(422)
+                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
 
-                        Promise.all(promises)
-                            .then(() => {
-                                res.status(200).send({success: true});
-                            });
-                    })
-                    .catch(() => res.status(422)
-                        .send({error: "Gæld kunne ikke oprettes."}));
-            })
-            .catch(() => res.status(401)
-                .send({error: "Brugeren kunne ikke verificeres."}));
+            updatePromises.push(updateCategoryPromise);
+
+            const setCategoryDebtsPromise = db.collection('categoryDebts').doc()
+                .set({
+                    debtID: debtDoc.id,
+                    categoryID: categoryID,
+                    amount: amountToSubtract
+                }).catch(() => res.status(422)
+                    .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+
+            updatePromises.push(setCategoryDebtsPromise);
+        });
+
+        await Promise.all(updatePromises);
+        res.status(200).send({success: true});
     })
 };

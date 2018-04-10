@@ -4,110 +4,106 @@ const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
 module.exports = function (req, res) {
-    cors(req, res, () => {
+    cors(req, res, async () => {
         const token = req.get('Authorization').split('Bearer ')[1];
-        admin.auth().verifyIdToken(token)
-            .then(async () => {
-                if (!req.body.amount)
-                    return res.status(422).send({error: 'Fejl i indtastning.'});
+        try {
+            await admin.auth().verifyIdToken(token);
+        } catch (err) {
+            res.status(401).send({error: "Brugeren kunne ikke verificeres."})
+        }
 
-                if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
-                    return res.status(422).send({error: 'Ugyldig udløbsdato.'});
+        if (!req.body.amount)
+            return res.status(422).send({error: 'Fejl i indtastning.'});
 
-                if (!req.body.categories || req.body.categories.length === 0)
-                    return res.status(422).send({error: 'Ingen kategorier valgt.'});
+        if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
+            return res.status(422).send({error: 'Ugyldig udløbsdato.'});
 
-                const amount = parseInt(req.body.amount);
-                const expirationDate = dateHelper.toDate(req.body.expirationDate);
-                const categories = req.body.categories;
-                const debtID = req.body.debtID ? String(req.body.debtID) : '';
-                const categoriesOfDebt = [];
+        if (!req.body.categories || req.body.categories.length === 0)
+            return res.status(422).send({error: 'Ingen kategorier valgt.'});
 
-                const db = admin.firestore();
+        const amount = parseInt(req.body.amount);
+        const expirationDate = dateHelper.toDate(req.body.expirationDate);
+        const categories = req.body.categories;
+        const debtID = req.body.debtID ? String(req.body.debtID) : '';
+        const categoriesOfDebt = [];
+        const db = admin.firestore();
 
-                if (debtID) {
-                    try {
-                        const querySnapshot = await db.collection("categoryDebts")
-                            .where("debtID", "==", debtID)
-                            .get();
+        if (debtID) {
+            try {
+                const querySnapshot = await db.collection("categoryDebts")
+                    .where("debtID", "==", debtID)
+                    .get();
 
-                        querySnapshot.forEach((doc) => {
-                            categoriesOfDebt.push({
-                                categoryID: doc.data().categoryID,
-                                amount: doc.data().amount
-                            });
+                querySnapshot.forEach((doc) => {
+                    categoriesOfDebt.push({
+                        categoryID: doc.data().categoryID,
+                        amount: doc.data().amount
+                    });
+                });
+            } catch (err) {
+                res.status(422).send({error: 'Hentning af kategorier fejlede.'});
+            }
+        }
+
+        let sum = 0;
+        let categoryOfDebtAmount = 0;
+        const calcSumPromises = [];
+
+        categories.forEach(category => {
+            const calcSumPromise = db.collection("categories").doc(category).get()
+                .then((doc) => {
+                    if (!doc.exists)
+                        return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+
+                    if (debtID) {
+                        const categoryOfDebt = categoriesOfDebt.filter((obj) => {
+                            return obj.categoryID === category;
                         });
-                    } catch (err) {
-                        res.status(422).send({error: 'Hentning af kategorier fejlede.'});
+
+                        categoryOfDebtAmount = categoryOfDebt[0] ? categoryOfDebt[0].amount : 0;
                     }
-                }
 
-                let sum = 0;
-                let categoryOfDebtAmount = 0;
-                const calcSumPromises = [];
-
-                categories.forEach(category => {
-                    const calcSumPromise = db.collection("categories").doc(category).get()
-                        .then((doc) => {
-                            if (!doc.exists)
-                                return res.status(400).send({error: 'Kategori kunne ikke findes.'});
-
-                            if (debtID) {
-                                const categoryOfDebt = categoriesOfDebt.filter((obj) => {
-                                    return obj.categoryID === category;
-                                });
-
-                                categoryOfDebtAmount = categoryOfDebt[0] ? categoryOfDebt[0].amount : 0;
-                            }
-
-                            sum += parseInt(doc.data().amount + categoryOfDebtAmount);
-                        });
-
-                    calcSumPromises.push(calcSumPromise);
+                    sum += parseInt(doc.data().amount + categoryOfDebtAmount);
                 });
 
-                Promise.all(calcSumPromises)
-                    .then(() => {
-                        const percentageToSubtract =
-                            ((amount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+            calcSumPromises.push(calcSumPromise);
+        });
 
-                        if (percentageToSubtract > 100)
-                            return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
+        await Promise.all(calcSumPromises);
+        const percentageToSubtract =
+            ((amount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
-                        const modifyAmountsPromises = [];
-                        const subtractionsArray = [];
+        if (percentageToSubtract > 100)
+            return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
 
-                        categories.forEach(category => {
-                            const categoryID = String(category);
+        const modifyAmountsPromises = [];
+        const subtractionsArray = [];
 
-                            const modifyAmountsPromise = db.collection("categories").doc(categoryID)
-                                .get()
-                                .then((doc) => {
-                                    if (debtID) {
-                                        const categoryOfDebt = categoriesOfDebt.filter((obj) => {
-                                            return obj.categoryID === categoryID;
-                                        });
+        categories.forEach(category => {
+            const categoryID = String(category);
 
-                                        categoryOfDebtAmount = categoryOfDebt[0] ? categoryOfDebt[0].amount : 0;
-                                    }
-
-                                    const categoryAmount = parseInt(doc.data().amount + categoryOfDebtAmount);
-                                    const amountToSubtract =
-                                        Math.round((categoryAmount / 100) * percentageToSubtract);
-
-                                    subtractionsArray.push({categoryID, amountToSubtract});
-                                });
-
-                            modifyAmountsPromises.push(modifyAmountsPromise);
+            const modifyAmountsPromise = db.collection("categories").doc(categoryID)
+                .get()
+                .then((doc) => {
+                    if (debtID) {
+                        const categoryOfDebt = categoriesOfDebt.filter((obj) => {
+                            return obj.categoryID === categoryID;
                         });
 
-                        Promise.all(modifyAmountsPromises)
-                            .then(() => {
-                                res.status(200).send(subtractionsArray);
-                            });
-                    });
-            })
-            .catch(() => res.status(401)
-                .send({error: "Brugeren kunne ikke verificeres."}));
+                        categoryOfDebtAmount = categoryOfDebt[0] ? categoryOfDebt[0].amount : 0;
+                    }
+
+                    const categoryAmount = parseInt(doc.data().amount + categoryOfDebtAmount);
+                    const amountToSubtract =
+                        Math.round((categoryAmount / 100) * percentageToSubtract);
+
+                    subtractionsArray.push({categoryID, amountToSubtract});
+                });
+
+            modifyAmountsPromises.push(modifyAmountsPromise);
+        });
+
+        await Promise.all(modifyAmountsPromises);
+        res.status(200).send(subtractionsArray);
     })
 };

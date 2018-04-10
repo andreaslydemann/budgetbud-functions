@@ -22,7 +22,7 @@ const editDebt = require('./debts/edit_debt');
 const deleteDebt = require('./debts/delete_debt');
 const deleteExpiredDebts = require('./debts/delete_expired_debts');
 const linkAccounts = require('./accounts/link_accounts');
-const getLinkedAccounts = require('./accounts/get_linked_accounts')
+const getLinkedAccounts = require('./accounts/get_linked_accounts');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
