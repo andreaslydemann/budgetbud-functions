@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -56,6 +57,18 @@ module.exports = function (req, res) {
 
                             promises.push(setCategoryDebtsPromise);
                         });
+/*
+                        db.collection("budgets").doc(budgetID)
+                            .get()
+                            .then(budgetDoc => {
+                                const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
+                                    totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + amount)
+                                })
+                                    .catch(() => res.status(422)
+                                        .send({error: 'Fejl opstod under gældsoprettelsen.'}));
+
+                                promises.push(updateTotalGoalsAmountPromise);
+                            });*/
 
                         Promise.all(promises)
                             .then(() => {

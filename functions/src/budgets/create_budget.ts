@@ -13,7 +13,7 @@ module.exports = function (req, res) {
                 const db = admin.firestore();
                 const userID = String(req.body.userID);
                 const income = String(req.body.income);
-                const totalExpenses = String(req.body.totalExpenses);
+                const totalGoalsAmount = String(req.body.totalGoalsAmount);
                 const disposable = String(req.body.disposable);
                 const categories = req.body.categories;
 
@@ -22,14 +22,14 @@ module.exports = function (req, res) {
                 budgetRef.set({
                     userID,
                     income,
-                    totalExpenses,
+                    totalGoalsAmount,
                     disposable
                 })
                     .then(() => res.status(200).send({success: true}))
-                    .catch(err => res.status(422)
+                    .catch(() => res.status(422)
                         .send({error: 'Kunne ikke oprette budget.'}));
 
-                const  budgetID = budgetRef.id;
+                const budgetID = budgetRef.id;
 
                 categories.forEach(categoryDoc => {
                     const categoryName = String(categoryDoc.name);
@@ -40,7 +40,7 @@ module.exports = function (req, res) {
                         budgetID
                     })
                         .then(() => res.status(200).send({success: true}))
-                        .catch(err => res.status(422)
+                        .catch(() => res.status(422)
                             .send({error: 'Kunne ikke oprette kategori.'}));
                 });
             })
