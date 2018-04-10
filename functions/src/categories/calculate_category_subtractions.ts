@@ -12,7 +12,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."})
         }
 
-        if (!req.body.amount)
+        if (!req.body.totalAmount)
             return res.status(422).send({error: 'Fejl i indtastning.'});
 
         if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
@@ -21,7 +21,7 @@ module.exports = function (req, res) {
         if (!req.body.categories || req.body.categories.length === 0)
             return res.status(422).send({error: 'Ingen kategorier valgt.'});
 
-        const amount = parseInt(req.body.amount);
+        const totalAmount = parseInt(req.body.totalAmount);
         const expirationDate = dateHelper.toDate(req.body.expirationDate);
         const categories = req.body.categories;
         const debtID = req.body.debtID ? String(req.body.debtID) : '';
@@ -71,7 +71,7 @@ module.exports = function (req, res) {
 
         await Promise.all(calcSumPromises);
         const percentageToSubtract =
-            ((amount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
+            ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
         if (percentageToSubtract > 100)
             return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});

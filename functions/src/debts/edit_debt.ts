@@ -11,7 +11,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."});
         }
 
-        if (!req.body.name || !req.body.amount || !req.body.budgetID || !req.body.debtID)
+        if (!req.body.name || !req.body.totalAmount || !req.body.budgetID || !req.body.debtID)
             return res.status(422).send({error: 'Fejl i indtastning.'});
 
         if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
@@ -21,7 +21,7 @@ module.exports = function (req, res) {
             return res.status(422).send({error: 'Ingen kategorier valgt.'});
 
         const name = String(req.body.name);
-        const totalAmount = parseInt(req.body.amount);
+        const totalAmount = parseInt(req.body.totalAmount);
         const expirationDate = dateHelper.toDate(req.body.expirationDate);
         const amountPerMonth = (totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
         const budgetID = String(req.body.budgetID);
