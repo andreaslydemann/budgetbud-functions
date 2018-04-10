@@ -27,7 +27,7 @@ module.exports = function (req, res) {
 
                 if (debtID) {
                     try {
-                        let querySnapshot = await db.collection("categoryDebts")
+                        const querySnapshot = await db.collection("categoryDebts")
                             .where("debtID", "==", debtID)
                             .get();
 

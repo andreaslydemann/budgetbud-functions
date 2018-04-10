@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -7,25 +8,20 @@ module.exports = function (req, res) {
 
         admin.auth().verifyIdToken(token)
             .then(() => {
-                if (!req.query.userID)
-                    return res.status(400).send({error: 'Fejl i anmodningen.'});
-
-                const userID = String(req.query.userID);
                 const db = admin.firestore();
 
-                db.collection("accounts")
-                    .where("userID", "==", userID)
+                db.collection("categoryTypes")
                     .get()
                     .then((querySnapshot) => {
-                        const accountsArray = [];
+                        const categoryTypeArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            accountsArray.push(doc.id);
+                            categoryTypeArray.push({id: doc.id, name: doc.data().name});
                         });
 
-                        res.status(200).send(accountsArray);
+                        res.status(200).send(categoryTypeArray);
                     })
-                    .catch(() => res.status(422).send({error: 'Kunne ikke hente konti.'}));
+                    .catch(() => res.status(422).send({error: 'Kunne ikke hente kategorityper.'}));
             })
             .catch(() => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
     })

@@ -11,16 +11,18 @@ const getBudget = require('./budgets/get_budget');
 const createBudget = require('./budgets/create_budget');
 const editBudget = require('./budgets/edit_budget');
 const deleteBudget = require('./budgets/delete_budget');
+const createCategories = require('./categories/create_categories');
 const getCategories = require('./categories/get_categories');
 const getCategoriesOfDebt = require('./categories/get_categories_of_debt');
 const calculateCategorySubtractions = require('./categories/calculate_category_subtractions');
+const getCategoryTypes = require('./categories/get_category_types');
 const getDebts = require('./debts/get_debts');
 const createDebt = require('./debts/create_debt');
 const editDebt = require('./debts/edit_debt');
 const deleteDebt = require('./debts/delete_debt');
 const deleteExpiredDebts = require('./debts/delete_expired_debts');
-const linkAccounts = require('./accounts/linkAccounts');
-const getLinkedAccounts = require('./accounts/getLinkedAccounts')
+const linkAccounts = require('./accounts/link_accounts');
+const getLinkedAccounts = require('./accounts/get_linked_accounts')
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -41,9 +43,11 @@ exports.editBudget = functions.https.onRequest(editBudget);
 exports.deleteBudget = functions.https.onRequest(deleteBudget);
 
 // ----------CATEGORY RELATED FUNCTIONS----------
+exports.createCategories = functions.https.onRequest(createCategories);
 exports.getCategories = functions.https.onRequest(getCategories);
 exports.getCategoriesOfDebt = functions.https.onRequest(getCategoriesOfDebt);
 exports.calculateCategorySubtractions = functions.https.onRequest(calculateCategorySubtractions);
+exports.getCategoryTypes = functions.https.onRequest(getCategoryTypes);
 
 // ----------DEBT RELATED FUNCTIONS----------
 exports.getDebts = functions.https.onRequest(getDebts);

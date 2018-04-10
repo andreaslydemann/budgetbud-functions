@@ -7,27 +7,25 @@ module.exports = function (req, res) {
 
         admin.auth().verifyIdToken(token)
             .then(() => {
-                if (!req.query.budgetID)
+                if (!req.query.userID)
                     return res.status(400).send({error: 'Fejl i anmodningen.'});
 
-                const budgetID = String(req.query.budgetID);
+                const userID = String(req.query.userID);
                 const db = admin.firestore();
 
-                db.collection("categories")
-                    .where("budgetID", "==", budgetID)
+                db.collection("linkedAccounts")
+                    .where("userID", "==", userID)
                     .get()
                     .then((querySnapshot) => {
-                        const categoryArray = [];
+                        const accountsArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            if (doc.data().amount > 0) {
-                                categoryArray.push({id: doc.id, categoryData: doc.data()});
-                            }
+                            accountsArray.push(doc.id);
                         });
 
-                        res.status(200).send(categoryArray);
+                        res.status(200).send(accountsArray);
                     })
-                    .catch(() => res.status(422).send({error: 'Kunne ikke hente kategorier.'}));
+                    .catch(() => res.status(422).send({error: 'Kunne ikke hente konti.'}));
             })
             .catch(() => res.status(401).send({error: "Brugeren kunne ikke verificeres."}));
     })

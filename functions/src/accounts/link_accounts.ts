@@ -17,7 +17,7 @@ module.exports = function (req, res) {
 
                 // Create new accounts using the userID and accountID from the eBankingData
                 const deleteAccountsPromises = [];
-                db.collection("accounts")
+                db.collection('linkedAccounts')
                     .where("userID", "==", userID)
                     .get()
                     .then((querySnapshot) => {
@@ -31,7 +31,7 @@ module.exports = function (req, res) {
                     .then(() => {
                         eBankingAccIDs.forEach(accountDoc => {
                             const id = String(accountDoc);
-                            db.collection('accounts').doc(id).set({
+                            db.collection('linkedAccounts').doc(id).set({
                                 userID
                             })
                                 .then(() => res.status(200).send({success: true}))
