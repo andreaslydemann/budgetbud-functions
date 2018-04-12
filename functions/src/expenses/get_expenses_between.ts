@@ -23,7 +23,11 @@ module.exports = function (req, res) {
 
         console.log(`${EBANKING_FUNCTIONS_URL}/getExpenses?accountIDs=${accountIDs}&from=${from}&to=${to}`);
 
-        const {data} = await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpenses?accountIDs=${accountIDs}&from=${from}&to=${to}`);
+        console.log("calling");
+        const {data} = await axios.get(`https://us-central1-ebanking-e6f84.cloudfunctions.net/getExpenses?accountIDs=["3ohRX45YYJMfec91RNBE","TCgCVjaVvWeWSA6CPYOi"]&from=04-10-2018&to=04-14-2018`);
+        console.log("called");
+
+        // const {data} = await fetch(`${EBANKING_FUNCTIONS_URL}/getExpenses?accountIDs=${accountIDs}&from=${from}&to=${to}`);
 
         const expenses = [];
         data.forEach((expense) => {

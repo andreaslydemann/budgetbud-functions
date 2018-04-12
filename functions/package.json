@@ -17,6 +17,7 @@
     "firebase": "^4.9.0",
     "firebase-admin": "~5.8.1",
     "firebase-functions": "^0.8.1",
+    "node-fetch": "^2.1.2",
     "twilio": "^3.11.3"
   },
   "devDependencies": {
