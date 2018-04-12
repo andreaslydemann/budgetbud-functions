@@ -10,7 +10,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."});
         }
 
-        // Verify that the user provided an categories
+        // Verify that the user provided categories
         if (!req.body.categories)
             return res.status(422).send({error: 'Fejl i indtastning.'});
 
@@ -27,7 +27,7 @@ module.exports = function (req, res) {
             const editPromise = categoriesCollection.doc(categoryID).set({
                 budgetID,
                 categoryID,
-                amount: categoryDoc.amount
+                amount: parseInt(categoryDoc.amount)
             }, {merge: true});
             editPromises.push(editPromise);
         });

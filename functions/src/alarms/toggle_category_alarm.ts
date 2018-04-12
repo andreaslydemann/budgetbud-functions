@@ -14,8 +14,8 @@ module.exports = function (req, res) {
         if (!req.body.budgetID || !req.body.categoryID)
             return res.status(400).send({error: 'Fejl i anmodningen.'});
 
-        const budgetID = String(req.query.budgetID);
-        const categoryID = String(req.query.categoryID);
+        const budgetID = String(req.body.budgetID);
+        const categoryID = String(req.body.categoryID);
         const db = admin.firestore();
         const categoryAlarmCollection = db.collection("categoryAlarms");
 
@@ -39,7 +39,7 @@ module.exports = function (req, res) {
                     res.status(422).send({error: 'Kunne ikke slette kategorialarm.'});
                 }
             }
-        };
+        }
 
         try {
             await categoryAlarmCollection.doc().set({
