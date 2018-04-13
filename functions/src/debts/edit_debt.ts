@@ -68,17 +68,17 @@ module.exports = function (req, res) {
         const returnAmountsPromises = [];
 
         values.forEach(categoryDoc => {
-            const categoryDebtDoc = categoryDebts.filter((obj) => {
+            const categoryDebtDoc = categoryDebts.docs.filter((obj) => {
                 return obj.data().categoryID === categoryDoc.id;
             });
 
             const returnAmountsPromise = categoryDoc.ref.update({
-                amount: (categoryDoc.data().amount + categoryDebtDoc.data().amount)
+                amount: (categoryDoc.data().amount + categoryDebtDoc[0].data().amount)
             }).catch(() => res.status(422)
                 .send({error: 'Fejl opstod under gældsændringen.'}));
 
             returnAmountsPromises.push(returnAmountsPromise);
-            returnAmountsPromises.push(categoryDebtDoc.ref.delete());
+            returnAmountsPromises.push(categoryDebtDoc[0].ref.delete());
         });
 
         await Promise.all(returnAmountsPromises);
