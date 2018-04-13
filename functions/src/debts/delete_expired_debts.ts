@@ -15,48 +15,44 @@ module.exports = function (req, res) {
 
         for (const debtDoc of debts) {
             if (new Date() <= new Date(debtDoc.data().expirationDate)) {
-
                 let categoryDebts;
-                const promises = [];
                 try {
                     categoryDebts = await db.collection("categoryDebts")
                         .where("debtID", "==", debtDoc.id)
                         .get();
-
-                    const budgetDoc = await db.collection("budgets").doc(debtDoc.data().budgetID).get();
-                    const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
-                        totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + debtDoc.data().amountPerMonth),
-                        disposable: (budgetDoc.data().disposable - debtDoc.data().amountPerMonth)
-                    });
-
-                    promises.push(updateTotalGoalsAmountPromise);
                 } catch (err) {
-                    res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
+                    res.status(422).send({error: 'Fejl opstod under gældssletningen.'});
                 }
 
+                const getCategoriesPromises = [];
+
                 categoryDebts.forEach(categoryDebtDoc => {
-                    const categoryAmount = categoryDebtDoc.data().amount;
-                    const categoryID = categoryDebtDoc.data().categoryID;
+                    const returnAmountsPromise = db.collection("categories")
+                        .doc(categoryDebtDoc.data().categoryID)
+                        .get();
 
-                    const returnAmountsPromise = db.collection("categories").doc(categoryID)
-                        .get()
-                        .then(categoryDoc => {
-                            categoryDoc.ref.update({
-                                amount: (categoryDoc.data().amount + categoryAmount)
-                            })
-                                .catch(() => res.status(422)
-                                    .send({error: 'Fejl opstod under gældssletningen.'}));
-
-                            debtDoc.ref.delete();
-                        });
-
-                    promises.push(returnAmountsPromise);
+                    getCategoriesPromises.push(returnAmountsPromise);
                 });
 
-                Promise.all(promises)
-                    .then(() => {
-                        res.status(200).send({success: true});
+                const values = await Promise.all(getCategoriesPromises);
+                const returnAmountsPromises = [];
+
+                values.forEach(categoryDoc => {
+                    const categoryDebtDoc = categoryDebts.docs.filter((obj) => {
+                        return obj.data().categoryID === categoryDoc.id;
                     });
+
+                    const returnAmountsPromise = categoryDoc.ref.update({
+                        amount: (categoryDoc.data().amount + categoryDebtDoc[0].data().amount)
+                    }).catch(() => res.status(422)
+                        .send({error: 'Fejl opstod under gældssletningen'}));
+
+                    returnAmountsPromises.push(returnAmountsPromise);
+                    returnAmountsPromises.push(categoryDebtDoc[0].ref.delete());
+                });
+
+                await Promise.all(returnAmountsPromises);
+                res.status(200).send({success: true});
             }
         }
     });

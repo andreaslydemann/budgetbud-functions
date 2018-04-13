@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -20,9 +21,7 @@ module.exports = function (req, res) {
                         const categoryArray = [];
 
                         querySnapshot.forEach((doc) => {
-                            if (doc.data().amount > 0) {
-                                categoryArray.push({id: doc.id, categoryData: doc.data()});
-                            }
+                            categoryArray.push({id: doc.id, categoryData: doc.data()});
                         });
 
                         res.status(200).send(categoryArray);
