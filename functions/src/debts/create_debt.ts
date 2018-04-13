@@ -24,7 +24,7 @@ module.exports = function (req, res) {
         const totalAmount = parseInt(req.body.totalAmount);
         const budgetID = String(req.body.budgetID);
         const expirationDate = dateHelper.toDate(req.body.expirationDate);
-        const amountPerMonth = (totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
+        const amountPerMonth = Math.round(totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
         const categories = req.body.categories;
         const db = admin.firestore();
 
