@@ -23,7 +23,8 @@ const deleteDebt = require('./debts/delete_debt');
 const deleteExpiredDebts = require('./debts/delete_expired_debts');
 const linkAccounts = require('./accounts/link_accounts');
 const getLinkedAccounts = require('./accounts/get_linked_accounts');
-const getExpensesBetween = require('./expenses/get_expenses_between');
+const getExpensesOfMonth = require('./expenses/get_expenses_of_month');
+const getAverageExpenses = require('./expenses/get_average_expenses');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -62,4 +63,5 @@ exports.linkAccounts = functions.https.onRequest(linkAccounts);
 exports.getLinkedAccounts = functions.https.onRequest(getLinkedAccounts);
 
 // ----------EXPENSES RELATED FUNCTIONS----------
-exports.getExpensesBetween = functions.https.onRequest(getExpensesBetween);
+exports.getExpensesOfMonth = functions.https.onRequest(getExpensesOfMonth);
+exports.getAverageExpenses = functions.https.onRequest(getAverageExpenses);
