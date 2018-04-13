@@ -22,7 +22,7 @@ module.exports = function (req, res) {
                     categoriesCollection.doc(categoryID).get()
                         .then(doc => {
                             if (!doc.exists) {
-                                doc.update({
+                                doc.ref.update({
                                     amount: categoryDoc.amount
                                 })
                             }

@@ -34,19 +34,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: 'Sletning af gæld fejlede.'})
         }
 
-        const promises = [];
-
-        try {
-            const budgetDoc = await db.collection("budgets").doc(debtDoc.data().budgetID).get();
-            const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
-                totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + debtDoc.data().amountPerMonth),
-                disposable: (budgetDoc.data().disposable - debtDoc.data().amountPerMonth)
-            });
-
-            promises.push(updateTotalGoalsAmountPromise);
-        } catch (err) {
-            res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
-        }
+        const returnAmountsPromises = [];
 
         querySnapshot.forEach(categoryDebtDoc => {
             const categoryAmount = categoryDebtDoc.data().amount;
@@ -64,10 +52,10 @@ module.exports = function (req, res) {
                     categoryDebtDoc.ref.delete();
                 });
 
-            promises.push(returnAmountsPromise);
+            returnAmountsPromises.push(returnAmountsPromise);
         });
 
-        await Promise.all(promises);
+        await Promise.all(returnAmountsPromises);
         res.status(200).send({success: true});
     });
 };

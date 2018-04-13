@@ -15,24 +15,16 @@ module.exports = function (req, res) {
 
         for (const debtDoc of debts) {
             if (new Date() <= new Date(debtDoc.data().expirationDate)) {
-
                 let categoryDebts;
-                const promises = [];
                 try {
                     categoryDebts = await db.collection("categoryDebts")
                         .where("debtID", "==", debtDoc.id)
                         .get();
-
-                    const budgetDoc = await db.collection("budgets").doc(debtDoc.data().budgetID).get();
-                    const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
-                        totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + debtDoc.data().amountPerMonth),
-                        disposable: (budgetDoc.data().disposable - debtDoc.data().amountPerMonth)
-                    });
-
-                    promises.push(updateTotalGoalsAmountPromise);
                 } catch (err) {
-                    res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
+                    res.status(422).send({error: 'Fejl opstod under gældssletningen.'});
                 }
+
+                const returnAmountsPromises = [];
 
                 categoryDebts.forEach(categoryDebtDoc => {
                     const categoryAmount = categoryDebtDoc.data().amount;
@@ -50,10 +42,10 @@ module.exports = function (req, res) {
                             debtDoc.ref.delete();
                         });
 
-                    promises.push(returnAmountsPromise);
+                    returnAmountsPromises.push(returnAmountsPromise);
                 });
 
-                Promise.all(promises)
+                Promise.all(returnAmountsPromises)
                     .then(() => {
                         res.status(200).send({success: true});
                     });

@@ -44,18 +44,6 @@ module.exports = function (req, res) {
 
         const updatePromises = [];
 
-        try {
-            const budgetDoc = await db.collection("budgets").doc(budgetID).get();
-            const updateTotalGoalsAmountPromise = budgetDoc.ref.update({
-                totalGoalsAmount: (budgetDoc.data().totalGoalsAmount + amountPerMonth),
-                disposable: (budgetDoc.data().disposable - amountPerMonth)
-            });
-
-            updatePromises.push(updateTotalGoalsAmountPromise);
-        } catch (err) {
-            res.status(422).send({error: 'Fejl opstod under budgetændringen.'});
-        }
-
         categories.forEach(c => {
             const categoryID = String(c.categoryID);
             const amountToSubtract = parseInt(c.amountToSubtract);
