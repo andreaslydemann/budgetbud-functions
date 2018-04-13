@@ -103,7 +103,6 @@ module.exports = function (req, res) {
             modifyAmountsPromises.push(modifyAmountsPromise);
         });
 
-        await Promise.all(modifyAmountsPromises);
         res.status(200).send(subtractionsArray);
     })
 };

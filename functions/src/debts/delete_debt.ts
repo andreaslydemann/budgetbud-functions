@@ -18,7 +18,7 @@ module.exports = function (req, res) {
         const db = admin.firestore();
 
         let debtDoc;
-        let querySnapshot;
+        let categoryDebts;
         try {
             debtDoc = await db.collection('debts').doc(debtID).get();
 
@@ -27,32 +27,38 @@ module.exports = function (req, res) {
 
             await db.collection("debts").doc(debtID).delete();
 
-            querySnapshot = await db.collection("categoryDebts")
+            categoryDebts = await db.collection("categoryDebts")
                 .where("debtID", "==", debtID)
                 .get();
         } catch (err) {
             res.status(401).send({error: 'Sletning af gæld fejlede.'})
         }
 
+        const getCategoriesPromises = [];
+
+        categoryDebts.forEach(categoryDebtDoc => {
+            const returnAmountsPromise = db.collection("categories")
+                .doc(categoryDebtDoc.data().categoryID)
+                .get();
+
+            getCategoriesPromises.push(returnAmountsPromise);
+        });
+
+        const values = await Promise.all(getCategoriesPromises);
         const returnAmountsPromises = [];
 
-        querySnapshot.forEach(categoryDebtDoc => {
-            const categoryAmount = categoryDebtDoc.data().amount;
-            const categoryID = categoryDebtDoc.data().categoryID;
+        values.forEach(categoryDoc => {
+            const categoryDebtDoc = categoryDebts.filter((obj) => {
+                return obj.data().categoryID === categoryDoc.id;
+            });
 
-            const returnAmountsPromise = db.collection("categories").doc(categoryID)
-                .get()
-                .then(categoryDoc => {
-                    categoryDoc.ref.update({
-                        amount: (categoryDoc.data().amount + categoryAmount)
-                    })
-                        .catch(() => res.status(422)
-                            .send({error: 'Fejl opstod under gældssletningen.'}));
-
-                    categoryDebtDoc.ref.delete();
-                });
+            const returnAmountsPromise = categoryDoc.ref.update({
+                amount: (categoryDoc.data().amount + categoryDebtDoc.data().amount)
+            }).catch(() => res.status(422)
+                .send({error: 'Fejl opstod under gældssletningen'}));
 
             returnAmountsPromises.push(returnAmountsPromise);
+            returnAmountsPromises.push(categoryDebtDoc.ref.delete());
         });
 
         await Promise.all(returnAmountsPromises);

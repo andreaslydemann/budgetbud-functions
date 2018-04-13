@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
 
@@ -23,14 +24,15 @@ module.exports = function (req, res) {
         const name = String(req.body.name);
         const totalAmount = parseInt(req.body.totalAmount);
         const expirationDate = dateHelper.toDate(req.body.expirationDate);
-        const amountPerMonth = Math.round(totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
+        const amountPerMonth =
+            Math.round(totalAmount / dateHelper.numberOfMonthsUntilDate(expirationDate));
         const budgetID = String(req.body.budgetID);
         const debtID = String(req.body.debtID);
         const categories = req.body.categories;
         const db = admin.firestore();
 
         let debtDoc;
-        let querySnapshot;
+        let categoryDebts;
         try {
             debtDoc = await db.collection('debts').doc(debtID).get();
 
@@ -45,32 +47,38 @@ module.exports = function (req, res) {
                 budgetID: budgetID
             });
 
-            querySnapshot = await db.collection("categoryDebts")
+            categoryDebts = await db.collection("categoryDebts")
                 .where("debtID", "==", debtID)
                 .get();
         } catch (err) {
             res.status(422).send({error: 'Kunne ikke ændre gæld.'})
         }
 
+        const getCategoriesPromises = [];
+
+        categoryDebts.forEach(categoryDebtDoc => {
+            const returnAmountsPromise = db.collection("categories")
+                .doc(categoryDebtDoc.data().categoryID)
+                .get();
+
+            getCategoriesPromises.push(returnAmountsPromise);
+        });
+
+        const values = await Promise.all(getCategoriesPromises);
         const returnAmountsPromises = [];
 
-        querySnapshot.forEach(categoryDebtDoc => {
-            const categoryAmount = categoryDebtDoc.data().amount;
-            const categoryID = categoryDebtDoc.data().categoryID;
+        values.forEach(categoryDoc => {
+            const categoryDebtDoc = categoryDebts.filter((obj) => {
+                return obj.data().categoryID === categoryDoc.id;
+            });
 
-            const returnAmountsPromise = db.collection("categories").doc(categoryID)
-                .get()
-                .then(categoryDoc => {
-                    categoryDoc.ref.update({
-                        amount: (categoryDoc.data().amount + categoryAmount)
-                    })
-                        .catch(() => res.status(422)
-                            .send({error: 'Fejl opstod under gældsændringen.'}));
-
-                    categoryDebtDoc.ref.delete();
-                });
+            const returnAmountsPromise = categoryDoc.ref.update({
+                amount: (categoryDoc.data().amount + categoryDebtDoc.data().amount)
+            }).catch(() => res.status(422)
+                .send({error: 'Fejl opstod under gældsændringen.'}));
 
             returnAmountsPromises.push(returnAmountsPromise);
+            returnAmountsPromises.push(categoryDebtDoc.ref.delete());
         });
 
         await Promise.all(returnAmountsPromises);
