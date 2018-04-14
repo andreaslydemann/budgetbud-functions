@@ -21,18 +21,17 @@ module.exports = function (req, res) {
             return res.status(400).send({error: 'Fejl i anmodningen.'});
 
         const userID = String(req.query.userID);
-        let accountsArray;
+        const dateInterval = dateHelper.currentMonthInterval();
+        let accountIDs;
 
         try {
-            accountsArray = accountsHelper.getLinkedAccounts(userID);
+            accountIDs = await accountsHelper.getLinkedAccounts(userID);
         } catch (err) {
             res.status(422).send({error: 'Kunne ikke hente konti.'});
         }
 
-        const dateInterval = dateHelper.currentMonthInterval();
-
         const {data} =
-            await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpenses?accountIDs=${accountsArray}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
+            await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpenses?accountIDs=${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
 
         const filteredExpenses = expenseFetcher.filterExpenses(data);
 
