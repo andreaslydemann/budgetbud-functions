@@ -16,7 +16,7 @@ module.exports = function (req, res) {
             return res.status(422).send({error: 'Fejl i indtastning.'});
 
         if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
-            return res.status(422).send({error: 'Ugyldig udløbsdato.'});
+            return res.status(422).send({error: 'Udløbsdato skal være en fremtidig dato.'});
 
         if (!req.body.categories || req.body.categories.length === 0)
             return res.status(422).send({error: 'Ingen kategorier valgt.'});
@@ -94,8 +94,11 @@ module.exports = function (req, res) {
                     }
 
                     const categoryAmount = parseInt(doc.data().amount + categoryOfDebtAmount);
-                    const amountToSubtract =
+                    let amountToSubtract =
                         Math.round((categoryAmount / 100) * percentageToSubtract);
+
+                    if (amountToSubtract < 1)
+                        amountToSubtract = 1;
 
                     subtractionsArray.push({categoryID, amountToSubtract});
                 });

@@ -21,10 +21,10 @@ const editDebt = require('./debts/edit_debt');
 const deleteDebt = require('./debts/delete_debt');
 const deleteExpiredDebts = require('./debts/delete_expired_debts');
 const calculateDebtCategorySubtractions =
-    require('./categories/calculate_debt_category_subtractions');
+    require('./debts/calculate_debt_category_subtractions');
 const editDisposable = require('./disposable/edit_disposable');
 const calculateDisposableCategoryDifferences =
-    require('./categories/calculate_disposable_category_differences');
+    require('./disposable/calculate_disposable_category_differences');
 const linkAccounts = require('./accounts/link_accounts');
 const getLinkedAccounts = require('./accounts/get_linked_accounts');
 const getExpensesOfMonth = require('./expenses/get_expenses_of_month');

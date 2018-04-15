@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
@@ -53,8 +54,11 @@ module.exports = function (req, res) {
                 .get()
                 .then((doc) => {
                     const categoryAmount = parseInt(doc.data().amount);
-                    const amountDifference =
+                    let amountDifference =
                         Math.round((categoryAmount / 100) * percentageDifference);
+
+                    if (amountDifference < 1)
+                        amountDifference = 1;
 
                     differencesArray.push({categoryID, amountDifference});
                 });
