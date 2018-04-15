@@ -16,7 +16,7 @@ module.exports = function (req, res) {
             return res.status(422).send({error: 'Fejl i indtastning.'});
 
         if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
-            return res.status(422).send({error: 'Udløbsdato skal være en fremtidig dato.'});
+            return res.status(422).send({error: 'Vælg en fremtidig udløbsdato.'});
 
         if (!req.body.categories || req.body.categories.length === 0)
             return res.status(422).send({error: 'Ingen kategorier valgt.'});
@@ -74,7 +74,7 @@ module.exports = function (req, res) {
             ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
         if (percentageToSubtract > 100)
-            return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
+            return res.status(400).send({error: 'Kategoribeløb er for små.'});
 
         const modifyAmountsPromises = [];
         const subtractionsArray = [];
