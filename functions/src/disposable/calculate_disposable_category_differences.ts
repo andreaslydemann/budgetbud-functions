@@ -57,9 +57,6 @@ module.exports = function (req, res) {
                     let amountDifference =
                         Math.round((categoryAmount / 100) * percentageDifference);
 
-                    if (amountDifference < 1)
-                        amountDifference = 1;
-
                     differencesArray.push({categoryID, amountDifference});
                 });
 
