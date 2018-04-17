@@ -6,6 +6,9 @@ const requestCode = require('./authentication/request_code');
 const verifyCode = require('./authentication/verify_code');
 const createUser = require('./authentication/create_user');
 const deleteUser = require('./authentication/delete_user');
+const getPhoneNumber = require('./authentication/get_phone_number');
+const changePhoneNumber = require('./authentication/change_phone_number');
+const changeCode = require('./authentication/change_code');
 const getBudgetID = require('./budgets/get_budget_id');
 const getBudget = require('./budgets/get_budget');
 const createBudget = require('./budgets/create_budget');
@@ -50,6 +53,9 @@ exports.requestCode = functions.https.onRequest(requestCode);
 exports.verifyCode = functions.https.onRequest(verifyCode);
 exports.createUser = functions.https.onRequest(createUser);
 exports.deleteUser = functions.https.onRequest(deleteUser);
+exports.getPhoneNumber = functions.https.onRequest(getPhoneNumber);
+exports.changePhoneNumber = functions.https.onRequest(changePhoneNumber);
+exports.changeCode = functions.https.onRequest(changeCode);
 
 // ----------BUDGET RELATED FUNCTIONS----------
 exports.getBudgetID = functions.https.onRequest(getBudgetID);

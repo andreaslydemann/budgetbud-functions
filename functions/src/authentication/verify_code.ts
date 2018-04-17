@@ -1,50 +1,48 @@
 import admin = require('firebase-admin');
 const crypto = require('crypto');
 
-module.exports = function (req, res) {
+module.exports = async function (req, res) {
     if (!req.body.cprNumber || !req.body.code)
         return res.status(400).send({error: 'Fejl i indtastning.'});
 
     const cprNumber = String(req.body.cprNumber);
     const code = String(req.body.code);
 
-    admin.auth().getUser(cprNumber)
-        .then((user) => {
-            if (user.disabled === true)
-                return res.status(400).send({error: 'Bruger er deaktiveret.'});
+    let user;
+    try {
+        user = await admin.auth().getUser(cprNumber);
+    } catch (err) {
+        res.status(422).send({error: 'Bruger er ikke registreret.'});
+    }
 
-            const db = admin.firestore();
-            const ref = db.collection("users").doc(cprNumber);
+    if (user.disabled === true)
+        return res.status(400).send({error: 'Bruger er deaktiveret.'});
 
-            ref.get()
-                .then((userDoc) => {
-                    if (!userDoc.exists)
-                        return res.status(400).send({error: 'Bruger er ikke registreret.'});
+    const db = admin.firestore();
 
-                    const hash = crypto.pbkdf2Sync(code, userDoc.data().codeSalt,
-                        10000, 128, 'sha512').toString('hex');
+    const userDoc = await db.collection("users").doc(cprNumber).get();
 
-                    if (userDoc.data().codeHash !== hash) {
-                        ref.get().then(doc => {
-                            const failedSignIns = doc.data().failedSignIns + 1;
+    if (!userDoc.exists)
+        return res.status(400).send({error: 'Bruger er ikke registreret.'});
 
-                            if (failedSignIns >= 3) {
-                                admin.auth().updateUser(cprNumber, {
-                                    disabled: true
-                                });
-                            }
+    const hash = crypto.pbkdf2Sync(code, userDoc.data().codeSalt,
+        10000, 128, 'sha512').toString('hex');
 
-                            ref.update({failedSignIns});
-                        });
+    if (userDoc.data().codeHash !== hash) {
+        const failedSignIns = userDoc.data().failedSignIns + 1;
 
-                        return res.status(400).send({error: 'Pinkode er forkert.'});
-                    }
+        if (failedSignIns >= 3) {
+            admin.auth().updateUser(cprNumber, {
+                disabled: true
+            });
+        }
 
-                    ref.update({failedSignIns: 0});
+        userDoc.ref.update({failedSignIns});
+        return res.status(400).send({error: 'Pinkode er forkert.'});
+    }
 
-                    admin.auth().createCustomToken(cprNumber)
-                        .then(token => res.send({token: token}))
-                });
-        })
-        .catch(err => res.status(422).send({error: 'Bruger er ikke registreret.'}));
+    userDoc.ref.update({failedSignIns: 0});
+
+    const token = await admin.auth().createCustomToken(cprNumber);
+    res.send({token: token})
 };
