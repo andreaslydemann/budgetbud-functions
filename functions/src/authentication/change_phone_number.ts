@@ -10,7 +10,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."})
         }
 
-        if (!req.body.cprNumber || !req.body.phoneNumber)
+        if (!req.body.cprNumber || !req.body.cprNumber)
             return res.status(400).send({error: 'Fejl i indtastning.'});
 
         const cprNumber = String(req.body.cprNumber);

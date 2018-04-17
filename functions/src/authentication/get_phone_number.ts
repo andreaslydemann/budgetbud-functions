@@ -18,7 +18,7 @@ module.exports = function (req, res) {
 
         try {
             const userDoc = await db.collection("users").doc(cprNumber).get();
-            res.status(200).send(userDoc.data().phoneNumber);
+            res.status(200).send({phoneNumber: userDoc.data().phoneNumber});
         } catch (err) {
             res.status(401).send({error: "Fejl i hentning af brugeroplysninger."})
         }
