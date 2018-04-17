@@ -11,7 +11,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."});
         }
 
-        if (!req.query.budgetID || !req.query.categoryID)
+        if (!req.query.budgetID)
             return res.status(400).send({error: 'Fejl i anmodningen.'});
 
         const budgetID = String(req.query.budgetID);
