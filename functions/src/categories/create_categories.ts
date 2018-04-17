@@ -8,8 +8,8 @@ module.exports = function (req, res) {
         admin.auth().verifyIdToken(token)
             .then(() => {
                 // Verify that the user provided an income
-                if (!req.body.categories)
-                    return res.status(422).send({error: 'Fejl i indtastning.'});
+                if (!req.body.categories || !req.body.budgetID)
+                    return res.status(422).send({error: 'Fejl i anmodningen.'});
 
                 const db = admin.firestore();
                 const categories = req.body.categories;
