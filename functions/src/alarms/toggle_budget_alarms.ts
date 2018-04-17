@@ -28,7 +28,7 @@ module.exports = function (req, res) {
                 res.status(422).send({error: 'Kunne ikke hente kategorialarmerne.'});
             }
 
-            const budgetAlarm = querySnapshot[0];
+            const budgetAlarm = querySnapshot.docs[0];
 
             try {
                 if (!budgetAlarm.exists)

@@ -28,7 +28,7 @@ module.exports = function (req, res) {
 
         const categoryArray = [];
 
-        querySnapshot.forEach((doc) => {
+        querySnapshot.docs.forEach((doc) => {
             const data = doc.data();
             categoryArray.push(data.categoryID)
         });

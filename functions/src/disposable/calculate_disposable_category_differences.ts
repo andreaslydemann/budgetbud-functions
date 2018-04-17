@@ -54,7 +54,7 @@ module.exports = function (req, res) {
                 .get()
                 .then((doc) => {
                     const categoryAmount = parseInt(doc.data().amount);
-                    let amountDifference =
+                    const amountDifference =
                         Math.round((categoryAmount / 100) * percentageDifference);
 
                     differencesArray.push({categoryID, amountDifference});

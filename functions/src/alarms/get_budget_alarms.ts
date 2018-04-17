@@ -25,6 +25,7 @@ module.exports = function (req, res) {
         } catch (err) {
             res.status(422).send({error: 'Kunne ikke hente budgetalarmer.'});
         }
+
         const budgetAlarms = querySnapshot.docs[0];
         if (!budgetAlarms.exists) {
             budgetExceeded = false;

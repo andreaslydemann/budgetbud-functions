@@ -13,7 +13,7 @@ module.exports = function (req, res) {
                     .where("userID", "==", userID)
                     .get()
                     .then(querySnapshot => {
-                            if (!querySnapshot.docs[0].exists)
+                            if (!querySnapshot.docs[0])
                                 return res.status(400).send({error: 'Budgettet eksisterer ikke.'});
 
                             res.status(200).send(querySnapshot.docs[0].id);

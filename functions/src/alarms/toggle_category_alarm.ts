@@ -22,34 +22,30 @@ module.exports = function (req, res) {
         let querySnapshot;
         try {
             querySnapshot = await categoryAlarmCollection
-                .where("budgetID", "==", budgetID)
+                .where("categoryID", "==", categoryID)
                 .get();
         } catch (err) {
             res.status(422).send({error: 'Kunne ikke hente kategorialarmerne.'});
         }
 
-        for (const doc of querySnapshot) {
-            const data = doc.data();
-
-            if (data.categoryID === categoryID) {
-                try {
-                    await doc.delete();
-                    res.status(200).send({success: true});
-                } catch (err) {
-                    res.status(422).send({error: 'Kunne ikke slette kategorialarm.'});
-                }
+        if (querySnapshot.docs[0]) {
+            try {
+                await querySnapshot.docs[0].ref.delete();
+                res.status(200).send({success: true});
+            } catch (err) {
+                res.status(422).send({error: 'Kunne ikke slette kategorialarm.'});
             }
-        }
-
-        try {
-            await categoryAlarmCollection.doc().set({
-                categoryID,
-                budgetID,
-                hasTriggered: false
-            });
-            res.status(200).send({success: true});
-        } catch (err) {
-            res.status(422).send({error: 'Kunne ikke opret kategorialarm.'});
+        } else {
+            try {
+                await categoryAlarmCollection.doc().set({
+                    categoryID,
+                    budgetID,
+                    hasTriggered: false
+                });
+                res.status(200).send({success: true});
+            } catch (err) {
+                res.status(422).send({error: 'Kunne ikke opret kategorialarm.'});
+            }
         }
     });
 };
