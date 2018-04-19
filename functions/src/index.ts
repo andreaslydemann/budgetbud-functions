@@ -9,6 +9,9 @@ const deleteUser = require('./authentication/delete_user');
 const getPhoneNumber = require('./authentication/get_phone_number');
 const changePhoneNumber = require('./authentication/change_phone_number');
 const changeCode = require('./authentication/change_code');
+const changeForgottenCode = require('./authentication/change_forgotten_code');
+const requestActivationCode = require('./authentication/request_activation_code');
+const verifyActivationCode = require('./authentication/verify_activation_code');
 const getBudgetID = require('./budgets/get_budget_id');
 const getBudget = require('./budgets/get_budget');
 const createBudget = require('./budgets/create_budget');
@@ -57,6 +60,9 @@ exports.deleteUser = functions.https.onRequest(deleteUser);
 exports.getPhoneNumber = functions.https.onRequest(getPhoneNumber);
 exports.changePhoneNumber = functions.https.onRequest(changePhoneNumber);
 exports.changeCode = functions.https.onRequest(changeCode);
+exports.changeForgottenCode = functions.https.onRequest(changeForgottenCode);
+exports.requestActivationCode = functions.https.onRequest(requestActivationCode);
+exports.verifyActivationCode = functions.https.onRequest(verifyActivationCode);
 
 // ----------BUDGET RELATED FUNCTIONS----------
 exports.getBudgetID = functions.https.onRequest(getBudgetID);
