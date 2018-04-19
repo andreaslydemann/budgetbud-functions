@@ -1,5 +1,4 @@
 import admin = require('firebase-admin');
-
 const crypto = require('crypto');
 
 module.exports = async function (req, res) {

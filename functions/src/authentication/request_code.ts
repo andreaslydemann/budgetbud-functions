@@ -27,18 +27,21 @@ module.exports = async function (req, res) {
         to: '+45' + phoneNumber,
         from: 'BudgetBud'
     }, async (err) => {
-        if (err) {
+        if (err)
             return res.status(400).send(err);
-        }
 
         const db = admin.firestore();
 
-        await db.collection("users").doc(cprNumber).set({
-            phoneNumber: phoneNumber,
-            codeSalt: salt,
-            codeHash: hash,
-            failedSignIns: 0
-        });
+        try {
+            await db.collection("users").doc(cprNumber).set({
+                phoneNumber: phoneNumber,
+                codeSalt: salt,
+                codeHash: hash,
+                failedSignIns: 0
+            });
+        } catch (err) {
+            res.status(400).send({error: 'Fejl opstod i anmodningen.'});
+        }
 
         res.send({success: true});
     });

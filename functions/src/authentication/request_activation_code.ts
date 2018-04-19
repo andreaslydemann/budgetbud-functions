@@ -38,15 +38,18 @@ module.exports = async function (req, res) {
         to: '+45' + userDoc.data().phoneNumber,
         from: 'BudgetBud'
     }, async (err) => {
-        if (err) {
+        if (err)
             return res.status(400).send(err);
-        }
 
-        await db.collection("users").doc(cprNumber).update({
-            activationCodeSalt: salt,
-            activationCodeHash: hash,
-            activationCodeCreatedAt: new Date()
-        });
+        try {
+            await userDoc.ref.update({
+                activationCodeSalt: salt,
+                activationCodeHash: hash,
+                activationCodeCreatedAt: new Date()
+            });
+        } catch (err) {
+            res.status(400).send({error: 'Fejl opstod i anmodningen.'});
+        }
 
         res.send({success: true});
     });
