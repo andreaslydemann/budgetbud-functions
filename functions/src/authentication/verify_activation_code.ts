@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const crypto = require('crypto');
 
 module.exports = async function (req, res) {
@@ -24,6 +25,13 @@ module.exports = async function (req, res) {
 
     if (!userDoc.exists)
         return res.status(400).send({error: 'Bruger er ikke registreret.'});
+
+    const expirationTime = new Date();
+    expirationTime.setTime(new Date(userDoc.data().activationCodeCreatedAt)
+        .getTime() + (10 * 60 * 1000));
+
+    if (new Date() > expirationTime)
+        return res.status(400).send({error: 'Aktiveringskode er udløbet.'});
 
     const hash = crypto.pbkdf2Sync(activationCode, userDoc.data().codeSalt,
         10000, 128, 'sha512').toString('hex');
