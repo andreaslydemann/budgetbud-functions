@@ -30,8 +30,9 @@ module.exports = function (req, res) {
             res.status(422).send({error: 'Kunne ikke hente konti.'});
         }
 
-        const {data} =
-            await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates?accountIDs=${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
+        const {data} = await axios
+            .get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates?accountIDs=
+            ${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
 
         const filteredExpenses = expenseFetcher.filterExpenses(data);
 
