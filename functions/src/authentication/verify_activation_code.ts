@@ -33,7 +33,7 @@ module.exports = async function (req, res) {
     if (new Date() > expirationTime)
         return res.status(400).send({error: 'Aktiveringskode er udløbet.'});
 
-    const hash = crypto.pbkdf2Sync(activationCode, userDoc.data().codeSalt,
+    const hash = crypto.pbkdf2Sync(activationCode, userDoc.data().activationCodeSalt,
         10000, 128, 'sha512').toString('hex');
 
     if (userDoc.data().activationCodeHash !== hash)

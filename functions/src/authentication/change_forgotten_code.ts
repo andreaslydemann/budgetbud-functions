@@ -19,6 +19,9 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Fejl i hentning af brugeroplysninger."})
         }
 
+        if (!userDoc.exists)
+            return res.status(400).send({error: 'Bruger er ikke registreret.'});
+
         const hash = crypto.pbkdf2Sync(code, userDoc.data().codeSalt,
             10000, 128, 'sha512').toString('hex');
 

@@ -43,6 +43,7 @@ module.exports = async function (req, res) {
         }
 
         await db.collection("users").doc(cprNumber).update({
+            activationCodeSalt: salt,
             activationCodeHash: hash,
             activationCodeCreatedAt: new Date()
         });
