@@ -16,7 +16,7 @@ module.exports = function (req, res) {
                 const budgetID = String(req.body.budgetID);
 
                 categories.forEach(categoryDoc => {
-                    const categoryTypeID = String(categoryDoc.name);
+                    const categoryTypeID = String(categoryDoc.categoryTypeID);
                     const categoryAmount = parseInt(categoryDoc.amount);
                     if (categoryAmount > 0) {
                         db.collection('categories').doc().set({

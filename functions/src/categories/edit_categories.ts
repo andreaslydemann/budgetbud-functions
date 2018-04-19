@@ -14,22 +14,38 @@ module.exports = function (req, res) {
         if (!req.body.categories)
             return res.status(422).send({error: 'Fejl i indtastning.'});
 
+        if (!req.body.budgetID)
+            return res.status(422).send({error: 'Fejl i anmodningen'});
+
         const db = admin.firestore();
         const categories = req.body.categories;
         const budgetID = String(req.body.budgetID);
-        const categoryID = String(req.body.categoryID);
 
         const categoriesCollection = db.collection("categories");
-
         const editPromises = [];
+        let editPromise;
 
         categories.forEach(categoryDoc => {
-            const editPromise = categoriesCollection.doc(categoryID).set({
-                budgetID,
-                categoryID,
-                amount: parseInt(categoryDoc.amount)
-            }, {merge: true});
-            editPromises.push(editPromise);
+            const categoryTypeID = String(categoryDoc.categoryTypeID);
+            const categoryAmount = parseInt(categoryDoc.amount);
+            if (categoryAmount > 0) {
+                if(categoryDoc.categoryID) {
+                    editPromise = categoriesCollection.doc(categoryDoc.categoryID).update({
+                        amount: categoryAmount
+                    })
+                        .catch(err => res.status(422)
+                            .send({error: 'Kunne ikke redigere kategori.'}));
+                } else {
+                    editPromise = categoriesCollection.doc().set({
+                        amount: categoryAmount,
+                        budgetID,
+                        categoryTypeID
+                    })
+                        .catch(err => res.status(422)
+                            .send({error: 'Kunne ikke redigere kategori.'}));
+                }
+                editPromises.push(editPromise);
+            }
         });
 
         await Promise.all(editPromises);

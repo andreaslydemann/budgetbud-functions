@@ -9,7 +9,6 @@ module.exports = function (req, res) {
             .then(() => {
                 // Verify that the user provided an data
                 if (!req.body.income ||
-                    !req.body.categories ||
                     !req.body.disposable ||
                     !req.body.totalGoalsAmount)
                     return res.status(422).send({error: 'Fejl i anmodningen.'});
