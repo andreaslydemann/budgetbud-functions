@@ -41,6 +41,10 @@ const getCategoryAlarms = require('./alarms/get_category_alarms');
 const toggleBudgetAlarms = require('./alarms/toggle_budget_alarms');
 const getBudgetAlarms = require('./alarms/get_budget_alarms');
 const resetAlarms = require('./alarms/reset_alarms');
+const addPushToken = require('./notifications/add_push_token');
+const notifyBudgetExceeded = require('./notifications/notify_budget_exceeded');
+const notifyCategoryExceeded = require('./notifications/notify_category_exceeded');
+const notifyWeeklyStatus = require('./notifications/notify_weekly_status');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -101,3 +105,9 @@ exports.calculateDisposableCategoryDifferences =
 // ----------EXPENSES RELATED FUNCTIONS----------
 exports.getExpensesOfMonth = functions.https.onRequest(getExpensesOfMonth);
 exports.getAverageExpenses = functions.https.onRequest(getAverageExpenses);
+
+// ----------NOTIFICATION RELATED FUNCTIONS----------
+exports.addPushToken = functions.https.onRequest(addPushToken);
+exports.notifyBudgetExceeded = functions.https.onRequest(notifyBudgetExceeded);
+exports.notifyCategoryExceeded = functions.https.onRequest(notifyCategoryExceeded);
+exports.notifyWeeklyStatus = functions.https.onRequest(notifyWeeklyStatus);

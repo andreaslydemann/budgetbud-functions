@@ -11,7 +11,7 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."});
         }
         // Verify that the user provided an income
-        if (!req.body.eBankingAccIDs || !req.body.userID)
+        if (!req.body.userID)
             return res.status(422).send({error: 'Fejl i anmodningen.'});
 
         const db = admin.firestore();
@@ -28,14 +28,17 @@ module.exports = function (req, res) {
                 });
             });
 
-        eBankingAccIDs.forEach(accountDoc => {
-            const id = String(accountDoc);
-            db.collection('linkedAccounts').doc(id).set({
-                userID
-            })
-                .then(() => res.status(200).send({success: true}))
-                .catch(err => res.status(422)
-                    .send({error: 'Kunne ikke oprette konti.'}));
-        });
+        if(eBankingAccIDs.length > 0) {
+            eBankingAccIDs.forEach(accountDoc => {
+                const id = String(accountDoc);
+                db.collection('linkedAccounts').doc(id).set({
+                    userID
+                })
+                    .then(() => res.status(200).send({success: true}))
+                    .catch(err => res.status(422)
+                        .send({error: 'Kunne ikke oprette konti.'}));
+            });
+        }
+        res.status(200).send({success: true})
     })
 };
