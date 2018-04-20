@@ -11,7 +11,7 @@ module.exports = function (req, res) {
         const callersCronKey = req.query.cronKey;
         const cronKey = functions.config().cron.key;
 
-        if (callersCronKey === cronKey)
+        if (callersCronKey !== cronKey)
             res.status(422).send({error: 'Cron key matchede ikke.'});
 
         const db = admin.firestore();
