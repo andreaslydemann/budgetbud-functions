@@ -10,12 +10,12 @@ module.exports = function (req, res) {
                 res.status(401).send({error: "Brugeren kunne ikke verificeres."});
             }
 
-            if (!req.body.budgetID || !req.body.weeklyStatus || !req.body.budgetExceeded)
+            if (!req.query.budgetID)
                 return res.status(400).send({error: 'Fejl i anmodningen.'});
 
             const budgetID = String(req.body.budgetID);
-            const budgetExceeded = Boolean(req.body.budgetExceeded);
-            const weeklyStatus = Boolean(req.body.weeklyStatus);
+            const budgetExceeded = req.body.budgetExceeded;
+            const weeklyStatus = req.body.weeklyStatus;
             const db = admin.firestore();
             const budgetAlarmsCollection = db.collection("budgetAlarms");
 
@@ -25,13 +25,13 @@ module.exports = function (req, res) {
                     .where("budgetID", "==", budgetID)
                     .get();
             } catch (err) {
-                res.status(422).send({error: 'Kunne ikke hente kategorialarmerne.'});
+                res.status(422).send({error: 'Kunne ikke hente budgetalarmer.'});
             }
 
             const budgetAlarm = querySnapshot.docs[0];
 
             try {
-                if (!budgetAlarm.exists)
+                if (!budgetAlarm)
                     await budgetAlarmsCollection.doc().set({
                         budgetID,
                         budgetExceeded,

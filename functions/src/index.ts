@@ -38,6 +38,9 @@ const getExpensesOfMonth = require('./expenses/get_expenses_of_month');
 const getAverageExpenses = require('./expenses/get_average_expenses');
 const toggleCategoryAlarm = require('./alarms/toggle_category_alarm');
 const getCategoryAlarms = require('./alarms/get_category_alarms');
+const toggleBudgetAlarms = require('./alarms/toggle_budget_alarms');
+const getBudgetAlarms = require('./alarms/get_budget_alarms');
+const resetAlarms = require('./alarms/reset_alarms');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -51,6 +54,9 @@ exports.getLinkedAccounts = functions.https.onRequest(getLinkedAccounts);
 // ----------ALARM RELATED FUNCTIONS----------
 exports.toggleCategoryAlarm = functions.https.onRequest(toggleCategoryAlarm);
 exports.getCategoryAlarms = functions.https.onRequest(getCategoryAlarms);
+exports.toggleBudgetAlarms = functions.https.onRequest(toggleBudgetAlarms);
+exports.getBudgetAlarms = functions.https.onRequest(getBudgetAlarms);
+exports.resetAlarms = functions.https.onRequest(resetAlarms);
 
 // ----------AUTH RELATED FUNCTIONS----------
 exports.requestCode = functions.https.onRequest(requestCode);

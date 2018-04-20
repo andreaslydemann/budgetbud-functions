@@ -14,10 +14,8 @@ module.exports = function (req, res) {
 
         const budgetID = String(req.query.budgetID);
         const db = admin.firestore();
-        const alarmsArray = [];
-        let budgetExceeded, weeklyStatus;
+        let budgetExceeded, weeklyStatus, querySnapshot;
 
-        let querySnapshot;
         try {
             querySnapshot = await db.collection("budgetAlarms")
                 .where("budgetID", "==", budgetID)
@@ -27,17 +25,14 @@ module.exports = function (req, res) {
         }
 
         const budgetAlarms = querySnapshot.docs[0];
-        if (!budgetAlarms.exists) {
+        if (!budgetAlarms) {
             budgetExceeded = false;
             weeklyStatus = false;
         } else {
-            budgetExceeded = budgetAlarms.data.budgetExeeded;
-            weeklyStatus = budgetAlarms.data.weeklyStatus;
+            budgetExceeded = budgetAlarms.data().budgetExceeded;
+            weeklyStatus = budgetAlarms.data().weeklyStatus;
         }
-        alarmsArray.push({
-            budgetExceeded,
-            weeklyStatus
-        });
-        res.status(200).send(alarmsArray);
+        const alarms = {budgetExceeded, weeklyStatus};
+        res.status(200).send(alarms);
     })
 };
