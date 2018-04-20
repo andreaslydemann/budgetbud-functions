@@ -1,6 +1,5 @@
 import admin = require('firebase-admin');
 import axios from 'axios';
-
 const dateHelper = require('../helpers/date_helper');
 const urls = require('../config/urls');
 const expenseFetcher = require('../helpers/filter_expenses');
