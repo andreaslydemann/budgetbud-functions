@@ -11,16 +11,16 @@ module.exports = function (req, res) {
             res.status(401).send({error: "Brugeren kunne ikke verificeres."})
         }
 
-        if (!req.body.userID || !req.body.pushToken)
+        if (!req.body.cprNumber || !req.body.pushToken)
             return res.status(400).send({error: 'Fejl i anmodningen.'});
 
-        const userID = String(req.body.userID);
+        const cprNumber = String(req.body.cprNumber);
         const pushToken = String(req.body.pushToken);
         const db = admin.firestore();
 
         let userDoc;
         try {
-            userDoc = await db.collection("users").doc(userID).get();
+            userDoc = await db.collection("users").doc(cprNumber).get();
         } catch (err) {
             res.status(401).send({error: "Fejl i hentning af brugeroplysninger."})
         }

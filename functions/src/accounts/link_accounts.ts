@@ -4,41 +4,54 @@ const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
-        const token = req.get('Authorization').split('Bearer ')[1];
-        try {
-            await admin.auth().verifyIdToken(token);
-        } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
-        }
-        // Verify that the user provided an income
-        if (!req.body.userID)
-            return res.status(422).send({error: 'Fejl i anmodningen.'});
+            const token = req.get('Authorization').split('Bearer ')[1];
+            try {
+                await admin.auth().verifyIdToken(token);
+            } catch (err) {
+                res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            }
+            // Verify that the user provided an income
+            if (!req.body.userID)
+                return res.status(422).send({error: 'Fejl i anmodningen.'});
 
-        const db = admin.firestore();
-        const userID = String(req.body.userID);
-        const eBankingAccIDs = req.body.eBankingAccIDs;
+            const db = admin.firestore();
+            const userID = String(req.body.userID);
+            const eBankingAccIDs = req.body.eBankingAccIDs;
+            const linkAccountsPromises = [];
+            const deleteAccountsPromises = [];
 
-        // Create new accounts using the userID and accountID from the eBankingData
-        await db.collection('linkedAccounts')
-            .where("userID", "==", userID)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    doc.ref.delete();
-                });
-            });
+            // Create new accounts using the userID and accountID from the eBankingData
+            let linkedAccounts;
+            try {
+                linkedAccounts = await db.collection('linkedAccounts')
+                    .where("userID", "==", userID)
+                    .get();
+            } catch (err) {
+                res.status(422).send({error: "Konti kunne ikke findes."})
+            }
 
-        if(eBankingAccIDs.length > 0) {
-            eBankingAccIDs.forEach(accountDoc => {
-                const id = String(accountDoc);
-                db.collection('linkedAccounts').doc(id).set({
-                    userID
-                })
-                    .then(() => res.status(200).send({success: true}))
+            linkedAccounts.forEach((account) => {
+                const deleteAccountsPromise = account.ref.delete()
                     .catch(err => res.status(422)
-                        .send({error: 'Kunne ikke oprette konti.'}));
+                        .send({error: 'Kunne ikke slette konti.'}));
+                deleteAccountsPromises.push(deleteAccountsPromise)
             });
+
+            await Promise.all(deleteAccountsPromises);
+
+            if (eBankingAccIDs.length > 0) {
+                eBankingAccIDs.forEach(accountDoc => {
+                    const id = String(accountDoc);
+                    const linkAccountPromise = db.collection('linkedAccounts').doc(id).set({
+                        userID
+                    })
+                        .catch(err => res.status(422)
+                            .send({error: 'Kunne ikke oprette konti.'}));
+                    linkAccountsPromises.push(linkAccountPromise)
+                })
+            }
+            await Promise.all(linkAccountsPromises);
+            res.status(200).send({success: true})
         }
-        res.status(200).send({success: true})
-    })
+    )
 };

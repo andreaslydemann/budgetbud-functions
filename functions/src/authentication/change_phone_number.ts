@@ -24,7 +24,7 @@ module.exports = function (req, res) {
             await userDoc.ref.update({phoneNumber});
             return res.status(200).send({success: true});
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."})
+            res.status(401).send({error: "Brugerens telefonnummer kunne ikke opdateres."})
         }
     });
 };
