@@ -5,10 +5,10 @@ const cors = require('cors')({origin: true});
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
-        if (!req.query.cronKey)
+        if (!req.body.cronKey)
             return res.status(400).send({error: 'Fejl i anmodningen.'});
 
-        const callersCronKey = req.query.cronKey;
+        const callersCronKey = req.body.cronKey;
         const cronKey = functions.config().cron.key;
 
         if (callersCronKey !== cronKey)
