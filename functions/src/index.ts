@@ -2,49 +2,65 @@ const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const serviceAccount = require('./config/service_account');
 
-const requestCode = require('./authentication/request_code');
-const verifyCode = require('./authentication/verify_code');
-const createUser = require('./authentication/create_user');
-const deleteUser = require('./authentication/delete_user');
-const getPhoneNumber = require('./authentication/get_phone_number');
-const changePhoneNumber = require('./authentication/change_phone_number');
-const changeCode = require('./authentication/change_code');
-const changeForgottenCode = require('./authentication/change_forgotten_code');
-const requestActivationCode = require('./authentication/request_activation_code');
-const verifyActivationCode = require('./authentication/verify_activation_code');
-const getBudgetID = require('./budgets/get_budget_id');
-const getBudget = require('./budgets/get_budget');
-const createBudget = require('./budgets/create_budget');
-const editBudget = require('./budgets/edit_budget');
-const deleteBudget = require('./budgets/delete_budget');
-const createCategories = require('./categories/create_categories');
-const getCategories = require('./categories/get_categories');
-const editCategories = require('./categories/edit_categories');
-const getCategoriesOfDebt = require('./categories/get_categories_of_debt');
-const getCategoryTypes = require('./categories/get_category_types');
-const getDebts = require('./debts/get_debts');
-const createDebt = require('./debts/create_debt');
-const editDebt = require('./debts/edit_debt');
-const deleteDebt = require('./debts/delete_debt');
-const deleteExpiredDebts = require('./debts/delete_expired_debts');
-const calculateDebtCategorySubtractions =
-    require('./debts/calculate_debt_category_subtractions');
-const editDisposable = require('./disposable/edit_disposable');
-const calculateDisposableCategoryDifferences =
-    require('./disposable/calculate_disposable_category_differences');
-const linkAccounts = require('./accounts/link_accounts');
-const getLinkedAccounts = require('./accounts/get_linked_accounts');
-const getExpensesOfMonth = require('./expenses/get_expenses_of_month');
-const getAverageExpenses = require('./expenses/get_average_expenses');
-const toggleCategoryAlarm = require('./alarms/toggle_category_alarm');
-const getCategoryAlarms = require('./alarms/get_category_alarms');
-const toggleBudgetAlarms = require('./alarms/toggle_budget_alarms');
-const getBudgetAlarms = require('./alarms/get_budget_alarms');
-const resetAlarms = require('./alarms/reset_alarms');
-const addPushToken = require('./notifications/add_push_token');
-const notifyBudgetExceeded = require('./notifications/notify_budget_exceeded');
-const notifyCategoryExceeded = require('./notifications/notify_category_exceeded');
-const notifyWeeklyStatus = require('./notifications/notify_weekly_status');
+const {
+    getLinkedAccounts,
+    linkAccounts
+} = require('./accounts');
+const {
+    getBudgetAlarms,
+    getCategoryAlarms,
+    resetAlarms,
+    toggleBudgetAlarms,
+    toggleCategoryAlarm
+} = require('./alarms');
+const {
+    changeCode,
+    changeForgottenCode,
+    changePhoneNumber,
+    createUser,
+    deleteUser,
+    getPhoneNumber,
+    requestActivationCode,
+    requestCode,
+    verifyActivationCode,
+    verifyCode
+} = require('./authentication');
+const {
+    createBudget,
+    deleteBudget,
+    editBudget,
+    getBudget,
+    getBudgetID
+} = require('./budgets');
+const {
+    createCategories,
+    editCategories,
+    getCategories,
+    getCategoriesOfDebt,
+    getCategoryTypes
+} = require('./categories');
+const {
+    calculateDebtCategorySubtractions,
+    createDebt,
+    deleteDebt,
+    deleteExpiredDebts,
+    editDebt,
+    getDebts
+} = require('./debts');
+const {
+    calculateDisposableCategoryDifferences,
+    editDisposable
+} = require('./disposable');
+const {
+    getAverageExpenses,
+    getExpensesOfMonth
+} = require('./expenses');
+const {
+    addPushToken,
+    notifyBudgetExceeded,
+    notifyCategoryExceeded,
+    notifyWeeklyStatus
+} = require('./notifications');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
