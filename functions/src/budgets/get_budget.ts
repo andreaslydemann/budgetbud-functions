@@ -19,13 +19,10 @@ module.exports = function (req, res) {
 
         let budgetDoc;
         try {
-            budgetDoc = db.collection('budgets').doc(budgetID).get();
+            budgetDoc = await db.collection('budgets').doc(budgetID).get();
         } catch (err) {
             res.status(422).send({error: "Kunne ikke finde budgettet."});
         }
-
-        if (!budgetDoc.exists)
-            return res.status(400).send({error: 'Budgettet eksisterer ikke.'});
 
         res.status(200).send({budgetData: budgetDoc.data()});
     })
