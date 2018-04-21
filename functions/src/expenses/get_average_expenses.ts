@@ -4,6 +4,7 @@ const dateHelper = require('../helpers/date_helper');
 const urls = require('../config/urls');
 const expenseFetcher = require('../helpers/filter_expenses');
 const accountsHelper = require('../helpers/accounts_helper');
+const translator = require('../strings/translator');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
 const cors = require('cors')({origin: true});
 
@@ -13,11 +14,11 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            res.status(401).send({error: translator.t('userNotVerified')});
         }
 
         if (!req.query.userID)
-            return res.status(400).send({error: 'Fejl i anmodningen.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         let accountIDs;
         const userID = String(req.query.userID);
@@ -26,7 +27,7 @@ module.exports = function (req, res) {
         try {
             accountIDs = await accountsHelper.getLinkedAccounts(userID);
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke hente konti.'});
+            res.status(422).send({error: translator.t('accountsFetchFailed')});
         }
 
         const {data} = await axios

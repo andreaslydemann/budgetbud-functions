@@ -18,7 +18,7 @@ module.exports = function (req, res) {
             const accountsArray = await accountsHelper.getLinkedAccounts(userID);
             res.status(200).send(accountsArray);
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke hente konti.'});
+            res.status(422).send({error: translator.t('accountsFetchFailed')});
         }
     })
 };

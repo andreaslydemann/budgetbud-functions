@@ -2,6 +2,7 @@ import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -9,11 +10,11 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            res.status(401).send({error: translator.t('userNotVerified')});
         }
 
         if (!req.query.budgetID)
-            return res.status(400).send({error: 'Fejl i anmodningen.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const budgetID = String(req.query.budgetID);
         const db = admin.firestore();
@@ -24,7 +25,7 @@ module.exports = function (req, res) {
                 .where("budgetID", "==", budgetID)
                 .get();
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke hente gælden.'});
+            res.status(422).send({error: translator.t('debtFetchFailed')});
         }
 
         const debtArray = [];

@@ -1,14 +1,15 @@
 import admin = require('firebase-admin');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
         if (!req.body.cprNumber || !req.body.code)
-            return res.status(400).send({error: 'Fejl i indtastning.'});
+            return res.status(400).send({error: translator.t('errorInEntry')});
 
         if (!req.body.activationCode)
-            return res.status(400).send({error: 'Fejl i anmodning.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const code = String(req.body.code);
         const cprNumber = String(req.body.cprNumber);
@@ -20,17 +21,17 @@ module.exports = function (req, res) {
         try {
             userDoc = await db.collection("users").doc(cprNumber).get();
         } catch (err) {
-            res.status(401).send({error: "Fejl i hentning af brugeroplysninger."})
+            res.status(401).send({error: translator.t('userDataFetchFailed')})
         }
 
         if (!userDoc.exists)
-            return res.status(400).send({error: 'Bruger er ikke registreret.'});
+            return res.status(400).send({error: translator.t('userNotRegistered')});
 
         const activationCodeHash = crypto.pbkdf2Sync(activationCode, userDoc.data().activationCodeSalt,
             10000, 128, 'sha512').toString('hex');
 
         if (userDoc.data().activationCodeHash !== activationCodeHash)
-            return res.status(400).send({error: 'Anmodning blev afvist.'});
+            return res.status(400).send({error: translator.t('requestDenied')});
 
         const codeHash = crypto.pbkdf2Sync(code, userDoc.data().codeSalt,
             10000, 128, 'sha512').toString('hex');
@@ -39,7 +40,7 @@ module.exports = function (req, res) {
             await userDoc.ref.update({codeHash: codeHash});
             res.status(200).send({success: true});
         } catch (err) {
-            res.status(401).send({error: "Ændring af pinkode fejlede."})
+            res.status(401).send({error: translator.t('codeChangeFailed')})
         }
     });
 };

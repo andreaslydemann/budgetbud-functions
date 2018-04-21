@@ -2,6 +2,7 @@ import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -9,17 +10,17 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            res.status(401).send({error: translator.t('userNotVerified')});
         }
 
         if (!req.body.name || !req.body.totalAmount || !req.body.budgetID || !req.body.debtID)
-            return res.status(422).send({error: 'Fejl i indtastning.'});
+            return res.status(422).send({error: translator.t('errorInEntry')});
 
         if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
-            return res.status(422).send({error: 'Ugyldig udløbsdato.'});
+            return res.status(422).send({error: translator.t('expirationDateInvalid')});
 
         if (!req.body.categories || req.body.categories.length === 0)
-            return res.status(422).send({error: 'Ingen kategorier valgt.'});
+            return res.status(422).send({error: translator.t('noCategoriesSelected')});
 
         const name = String(req.body.name);
         const totalAmount = parseInt(req.body.totalAmount);
@@ -37,7 +38,7 @@ module.exports = function (req, res) {
             debtDoc = await db.collection('debts').doc(debtID).get();
 
             if (!debtDoc.exists)
-                res.status(422).send({error: 'Gæld kunne ikke findes.'});
+                res.status(422).send({error: translator.t('debtNotFound')});
 
             await debtDoc.ref.update({
                 name: name,
@@ -51,7 +52,7 @@ module.exports = function (req, res) {
                 .where("debtID", "==", debtID)
                 .get();
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke ændre gæld.'})
+            res.status(422).send({error: translator.t('debtUpdateFailed')})
         }
 
         const getCategoriesPromises = [];
@@ -75,7 +76,7 @@ module.exports = function (req, res) {
             const returnAmountsPromise = categoryDoc.ref.update({
                 amount: (categoryDoc.data().amount + categoryDebtDoc[0].data().amount)
             }).catch(() => res.status(422)
-                .send({error: 'Fejl opstod under gældsændringen.'}));
+                .send({error: translator.t('debtUpdateFailed')}));
 
             returnAmountsPromises.push(returnAmountsPromise);
             returnAmountsPromises.push(categoryDebtDoc[0].ref.delete());
@@ -93,7 +94,7 @@ module.exports = function (req, res) {
                 .update({
                     amount: newAmount
                 }).catch(() => res.status(422)
-                    .send({error: 'Fejl opstod under gældsændringen.'}));
+                    .send({error: translator.t('debtUpdateFailed')}));
 
             updatePromises.push(updateCategoryPromise);
 
@@ -103,7 +104,7 @@ module.exports = function (req, res) {
                     categoryID: categoryID,
                     amount: amountToSubtract
                 }).catch(() => res.status(422)
-                    .send({error: 'Fejl opstod under gældsændringen.'}));
+                    .send({error: translator.t('debtUpdateFailed')}));
 
             updatePromises.push(setCategoryDebtsPromise);
         });

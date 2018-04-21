@@ -1,6 +1,7 @@
 import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -8,11 +9,11 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            res.status(401).send({error: translator.t('userNotVerified')});
         }
 
         if (!req.body.budgetID)
-            return res.status(400).send({error: 'Intet budgetID angivet.'});
+            return res.status(400).send({error: translator.t('noBudgetID')});
 
         const budgetID = String(req.body.budgetID);
 
@@ -24,16 +25,16 @@ module.exports = function (req, res) {
             budgetDoc = await budgetRef.get()
         } catch (err) {
             res.status(401)
-                .send({error: 'Hentning af budget fejlede.'});
+                .send({error: translator.t('budgetFetchFailed')});
         }
 
         if (!budgetDoc.exists)
-            res.status(422).send({error: 'Budgettet kunne ikke findes.'});
+            res.status(422).send({error: translator.t('budgetNotFound')});
 
         try {
             await budgetRef.delete();
         } catch (err) {
-            res.status(422).send({error: 'Sletning af budget fejlede.'});
+            res.status(422).send({error: translator.t('budgetDeletionFailed')});
         }
 
         const querySnapshot = await db.collection("categories").where("budgetID", "==", budgetID).get();
