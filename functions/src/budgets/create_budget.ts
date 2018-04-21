@@ -17,9 +17,9 @@ module.exports = function (req, res) {
 
         const db = admin.firestore();
         const userID = String(req.body.userID);
-        const income = String(req.body.income);
-        const totalGoalsAmount = String(req.body.totalGoalsAmount);
-        const disposable = String(req.body.disposable);
+        const income = parseInt(req.body.income);
+        const totalGoalsAmount = parseInt(req.body.totalGoalsAmount);
+        const disposable = parseInt(req.body.disposable);
 
         try {
             const budgetRef = db.collection('budgets').doc();
