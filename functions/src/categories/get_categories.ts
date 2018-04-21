@@ -19,7 +19,7 @@ module.exports = function (req, res) {
 
         let querySnapshot;
         try {
-            querySnapshot = db.collection("categories").where("budgetID", "==", budgetID).get();
+            querySnapshot = await db.collection("categories").where("budgetID", "==", budgetID).get();
         } catch (err) {
             res.status(422).send({error: 'Kunne ikke hente kategorier.'});
         }
