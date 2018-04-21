@@ -1,5 +1,4 @@
 import admin = require('firebase-admin');
-
 const functions = require('firebase-functions');
 const cors = require('cors')({origin: true});
 
@@ -24,21 +23,29 @@ module.exports = function (req, res) {
             res.status(422).send({error: 'Kunne ikke hente alarmer.'});
         }
 
+        const updatePromises = [];
+
         budgetAlarms.docs.forEach((doc) => {
-            doc.ref.update({
+            const updatePromise = doc.ref.update({
                 hasTriggered: false
             })
                 .catch(() => res.status(422)
                     .send({error: 'Budgetalarmernes alarmer kunne ikke nulstilles.'}));
+
+            updatePromises.push(updatePromise);
         });
 
         categoryAlarms.docs.forEach((doc) => {
-            doc.ref.update({
+            const updatePromise = doc.ref.update({
                 hasTriggered: false
             })
                 .catch(() => res.status(422)
                     .send({error: 'Kategorialarmernes alarmer kunne ikke nulstilles.'}));
+
+            updatePromises.push(updatePromise);
         });
+
+        await Promise.all(updatePromises);
         res.status(200).send({success: true});
     })
 };
