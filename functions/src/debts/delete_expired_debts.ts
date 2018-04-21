@@ -25,7 +25,7 @@ module.exports = function (req, res) {
             res.status(422).send({error: 'Kunne ikke hente gæld.'});
         }
 
-        for (let index in debts.docs) {
+        for (const index in debts.docs) {
             if (new Date() <= new Date(debts.docs[index].data().expirationDate))
                 continue;
 

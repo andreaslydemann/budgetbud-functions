@@ -30,8 +30,8 @@ module.exports = function (req, res) {
         }
 
         const {data} = await axios
-            .get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates?accountIDs=
-            ${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
+            .get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates?accountIDs=` +
+                        `${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
 
         const filteredExpenses = expenseFetcher.filterExpenses(data);
 

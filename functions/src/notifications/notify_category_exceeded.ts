@@ -31,54 +31,54 @@ module.exports = function (req, res) {
         });
 
         const budgets = await db.collection("budgets").get();
+
         for (const budgetIndex in budgets.docs) {
             const budget = budgets.docs[budgetIndex];
             const categoryAlarms = await db.collection("categoryAlarms")
                 .where("budgetID", "==", budget.id)
                 .get();
 
-            if (categoryAlarms.docs.length > 0) {
-                const userID = budget.data().userID;
-                const accountIDs = await accountsHelper.getLinkedAccounts(userID);
-                let filteredExpenses;
-                try {
-                    const {data} =
-                        await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates` +
-                            `?accountIDs=${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
+            if (categoryAlarms.docs.length === 0) continue;
 
-                    filteredExpenses = expenseFetcher.filterExpenses(data);
-                } catch (err) {
-                    res.status(422).send({error: "Kunne ikke hente månedens udgifter."});
-                }
+            const userID = budget.data().userID;
+            const accountIDs = await accountsHelper.getLinkedAccounts(userID);
+            let filteredExpenses;
+            try {
+                const {data} =
+                    await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates` +
+                        `?accountIDs=${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
 
-                for (const alarmIndex in categoryAlarms.docs) {
-                    const alarm = categoryAlarms.docs[alarmIndex];
+                filteredExpenses = expenseFetcher.filterExpenses(data);
+            } catch (err) {
+                res.status(422).send({error: "Kunne ikke hente månedens udgifter."});
+            }
 
-                    const category = await db.collection("categories").doc(alarm.data().categoryID).get();
-                    const expenseIndex = filteredExpenses.findIndex
-                    (x => x.categoryTypeID === category.data().categoryTypeID);
+            for (const alarmIndex in categoryAlarms.docs) {
+                const alarm = categoryAlarms.docs[alarmIndex];
 
-                    //TODO: Check for index !== -1
+                const category = await db.collection("categories").doc(alarm.data().categoryID).get();
+                const expenseIndex = filteredExpenses.findIndex
+                (x => x.categoryTypeID === category.data().categoryTypeID);
 
-                    if (filteredExpenses[expenseIndex].amount > category.data().amount) {
-                        const user = await db.collection("users").doc(userID).get();
-                        const pushToken = user.data().pushToken;
-                        const nameIndex = categoryTypeArray.findIndex(x => x.id === category.data().categoryTypeID);
-                        const name = categoryTypeArray[nameIndex].name;
+                if (expenseIndex === -1 ||
+                    filteredExpenses[expenseIndex].amount < category.data().amount)
+                    continue;
 
-                        if (pushToken) {
-                            messages.push({
-                                to: pushToken,
-                                body: `Følgende kategori overskredet: ${name}.`
-                            })
-                        }
-                    }
+                const user = await db.collection("users").doc(userID).get();
+                const pushToken = user.data().pushToken;
+                const nameIndex = categoryTypeArray.findIndex(x => x.id === category.data().categoryTypeID);
+                const name = categoryTypeArray[nameIndex].name;
+
+                if (pushToken) {
+                    messages.push({
+                        to: pushToken,
+                        body: `Følgende kategori overskredet: ${name}.`
+                    })
                 }
             }
         }
 
-        await
-            notificationHeler.sendNotifications(messages);
+        await notificationHeler.sendNotifications(messages);
         res.status(200).send({success: true})
     });
 };
