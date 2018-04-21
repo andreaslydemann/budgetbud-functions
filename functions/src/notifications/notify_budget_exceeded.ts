@@ -36,6 +36,7 @@ module.exports = function (req, res) {
         for (const budget of budgetIDs) {
             const currentBudget = await db.collection("budgets").doc(budget.budgetID).get();
             const userID = currentBudget.data().userID;
+            const totalGoalsAmount = currentBudget.data().totalGoalsAmount;
             const accountIDs = await accountsHelper.getLinkedAccounts(userID);
 
             let totalExpenseAmount = 0;
@@ -51,7 +52,7 @@ module.exports = function (req, res) {
                 res.status(422).send({error: "Kunne ikke hente månedens udgifter."});
             }
 
-            if (currentBudget.data().totalGoalsAmount < totalExpenseAmount) {
+            if (totalGoalsAmount < totalExpenseAmount) {
                 const user = await db.collection("users").doc(userID).get();
                 const pushToken = user.data().pushToken;
 
