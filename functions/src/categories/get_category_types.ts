@@ -1,6 +1,7 @@
 import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -8,7 +9,7 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            res.status(401).send({error: translator.t('userNotVerified')});
         }
 
         const db = admin.firestore();
@@ -17,7 +18,7 @@ module.exports = function (req, res) {
         try {
             querySnapshot = await db.collection("categoryTypes").get();
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke hente kategorityper.'});
+            res.status(422).send({error: translator.t('categoryFetchFailed')});
         }
 
         const categoryTypeArray = [];

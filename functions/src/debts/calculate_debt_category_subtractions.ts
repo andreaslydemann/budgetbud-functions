@@ -2,6 +2,7 @@ import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
 const dateHelper = require('../helpers/date_helper');
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -9,17 +10,17 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."})
+            res.status(401).send({error: translator.t('userNotVerified')})
         }
 
         if (!req.body.totalAmount)
-            return res.status(422).send({error: 'Fejl i indtastning.'});
+            return res.status(422).send({error: translator.t('errorInEntry')});
 
         if (!req.body.expirationDate || Date.now() >= dateHelper.toDate(req.body.expirationDate))
-            return res.status(422).send({error: 'Vælg en fremtidig udløbsdato.'});
+            return res.status(422).send({error: translator.t('pickFutureExpirationDate')});
 
         if (!req.body.categories || req.body.categories.length === 0)
-            return res.status(422).send({error: 'Ingen kategorier valgt.'});
+            return res.status(422).send({error: translator.t('noCategoriesSelected')});
 
         const totalAmount = parseInt(req.body.totalAmount);
         const expirationDate = dateHelper.toDate(req.body.expirationDate);
@@ -41,7 +42,7 @@ module.exports = function (req, res) {
                     });
                 });
             } catch (err) {
-                res.status(422).send({error: 'Hentning af kategorier fejlede.'});
+                res.status(422).send({error: translator.t('categoryFetchFailed')});
             }
         }
 
@@ -53,7 +54,7 @@ module.exports = function (req, res) {
             const calcSumPromise = db.collection("categories").doc(category).get()
                 .then((doc) => {
                     if (!doc.exists)
-                        return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+                        return res.status(400).send({error: translator.t('categoryNotFound')});
 
                     if (debtID) {
                         const categoryOfDebt = categoriesOfDebt.filter((obj) => {
@@ -74,7 +75,7 @@ module.exports = function (req, res) {
             ((totalAmount / sum) * 100) / dateHelper.numberOfMonthsUntilDate(expirationDate);
 
         if (percentageToSubtract > 100)
-            return res.status(400).send({error: 'Kategoribeløb er for små.'});
+            return res.status(400).send({error: translator.t('categoryAmountsTooSmall')});
 
         const modifyAmountsPromises = [];
         const subtractionsArray = [];

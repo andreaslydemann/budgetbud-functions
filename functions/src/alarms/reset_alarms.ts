@@ -1,17 +1,18 @@
 import admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
         if (!req.body.cronKey)
-            return res.status(400).send({error: 'Fejl i anmodningen.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const callersCronKey = req.body.cronKey;
         const cronKey = functions.config().cron.key;
 
         if (callersCronKey !== cronKey)
-            res.status(422).send({error: 'Cron key matchede ikke.'});
+            res.status(422).send({error: translator.t('cronKeyMatchFailed')});
 
         const db = admin.firestore();
         let budgetAlarms, categoryAlarms;
@@ -20,7 +21,7 @@ module.exports = function (req, res) {
             budgetAlarms = await db.collection("budgetAlarms").get();
             categoryAlarms = await db.collection("categoryAlarms").get();
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke hente alarmer.'});
+            res.status(422).send({error: translator.t('alarmsFetchFailed')});
         }
 
         const updatePromises = [];
@@ -30,7 +31,7 @@ module.exports = function (req, res) {
                 hasTriggered: false
             })
                 .catch(() => res.status(422)
-                    .send({error: 'Budgetalarmernes alarmer kunne ikke nulstilles.'}));
+                    .send({error: translator.t('budgetAlarmsResetFailed')}));
 
             updatePromises.push(updatePromise);
         });

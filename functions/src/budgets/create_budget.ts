@@ -1,6 +1,7 @@
 import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -8,12 +9,12 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+            res.status(401).send({error: translator.t('userNotVerified')});
         }
 
         // Verify that the user provided an income and userID
         if (!req.body.income || !req.body.userID)
-            return res.status(422).send({error: 'Fejl i indtastning.'});
+            return res.status(422).send({error: translator.t('errorInEntry')});
 
         const db = admin.firestore();
         const userID = String(req.body.userID);
@@ -33,7 +34,7 @@ module.exports = function (req, res) {
 
             res.status(200).send({id: budgetRef.id, success: true});
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke oprette budget.'});
+            res.status(422).send({error: translator.t('budgetCreationFailed')});
         }
     })
 };

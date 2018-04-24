@@ -6,6 +6,7 @@ const cors = require('cors')({origin: true});
 const notificationHeler = require('../helpers/notification_helper');
 const dateHelper = require('../helpers/date_helper');
 const urls = require('../config/urls');
+const translator = require('../strings/translator');
 const expenseFetcher = require('../helpers/filter_expenses');
 const accountsHelper = require('../helpers/accounts_helper');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
@@ -13,7 +14,7 @@ const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
 module.exports = function (req, res) {
     cors(req, res, async () => {
         if (!req.body.cronKey)
-            return res.status(400).send({error: 'Fejl i anmodningen.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const callersCronKey = req.body.cronKey;
         const cronKey = functions.config().cron.key;
@@ -22,7 +23,7 @@ module.exports = function (req, res) {
         const dateInterval = dateHelper.currentMonthInterval();
 
         if (callersCronKey !== cronKey)
-            res.status(422).send({error: 'Cron key matchede ikke.'});
+            res.status(422).send({error: translator.t('cronKeyMatchFailed')});
 
         const categoryTypeArray = [];
         const categoryTypes = await db.collection("categoryTypes").get();
@@ -50,7 +51,7 @@ module.exports = function (req, res) {
 
                 filteredExpenses = expenseFetcher.filterExpenses(data);
             } catch (err) {
-                res.status(422).send({error: "Kunne ikke hente månedens udgifter."});
+                res.status(422).send({error: translator.t('expensesOfMonthFetchFailed')});
             }
 
             for (const alarmIndex in categoryAlarms.docs) {
@@ -72,7 +73,7 @@ module.exports = function (req, res) {
                 if (pushToken) {
                     messages.push({
                         to: pushToken,
-                        body: `Følgende kategori overskredet: ${name}.`
+                        body: `${translator.t('categoryExceededMessage')}${name}.`
                     })
                 }
             }

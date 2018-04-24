@@ -5,6 +5,7 @@ const functions = require('firebase-functions');
 const dateHelper = require('../helpers/date_helper');
 const cors = require('cors')({origin: true});
 const urls = require('../config/urls');
+const translator = require('../strings/translator');
 const accountsHelper = require('../helpers/accounts_helper');
 const notificationHelper = require('../helpers/notification_helper');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
@@ -12,7 +13,7 @@ const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
 module.exports = function (req, res) {
     cors(req, res, async () => {
         if (!req.body.cronKey)
-            return res.status(400).send({error: 'Fejl i anmodningen.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const callersCronKey = req.body.cronKey;
         const cronKey = functions.config().cron.key;
@@ -22,10 +23,10 @@ module.exports = function (req, res) {
         const dateInterval = dateHelper.currentMonthInterval();
 
         if (callersCronKey !== cronKey)
-            res.status(422).send({error: 'Cron key matchede ikke.'});
+            res.status(422).send({error: translator.t('cronKeyMatchFailed')});
 
         const budgetsWithAlarms = await db.collection("budgetAlarms").where("budgetExceeded", "==", true).get()
-            .catch(() => res.status(422).send({error: "Kunne ikke finde budgetalarmer."}));
+            .catch(() => res.status(422).send({error: translator.t('budgetAlarmsFetchFailed')}));
 
         budgetsWithAlarms.forEach((budget) => {
             budgetIDs.push({
@@ -49,7 +50,7 @@ module.exports = function (req, res) {
                     totalExpenseAmount += expense.amount;
                 });
             } catch (err) {
-                res.status(422).send({error: "Kunne ikke hente månedens udgifter."});
+                res.status(422).send({error: translator.t('expensesOfMonthFetchFailed')});
             }
 
             if (totalGoalsAmount < totalExpenseAmount) {
@@ -59,7 +60,7 @@ module.exports = function (req, res) {
                 if (pushToken) {
                     messages.push({
                         to: pushToken,
-                        body: "Du har overskredet dit budget."
+                        body: translator.t('budgetExceededMessage')
                     })
                 }
             }

@@ -1,6 +1,7 @@
 import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -8,14 +9,14 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."})
+            res.status(401).send({error: translator.t('userNotVerified')})
         }
 
         if (!req.body.disposableDifference)
-            return res.status(422).send({error: 'Fejl i indtastning.'});
+            return res.status(422).send({error: translator.t('errorInEntry')});
 
         if (!req.body.categories || req.body.categories.length === 0)
-            return res.status(422).send({error: 'Ingen kategorier valgt.'});
+            return res.status(422).send({error: translator.t('noCategoriesSelected')});
 
         const disposableDifference = parseInt(req.body.disposableDifference);
         const categories = req.body.categories;
@@ -28,7 +29,7 @@ module.exports = function (req, res) {
             const calcSumPromise = db.collection("categories").doc(category).get()
                 .then((doc) => {
                     if (!doc.exists)
-                        return res.status(400).send({error: 'Kategori kunne ikke findes.'});
+                        return res.status(400).send({error: translator.t('categoryNotFound')});
 
                     sum += parseInt(doc.data().amount);
                 });
@@ -42,7 +43,7 @@ module.exports = function (req, res) {
             ((disposableDifference / sum) * 100);
 
         if (percentageDifference > 100)
-            return res.status(400).send({error: 'Kategoriernes beløb er ikke store nok.'});
+            return res.status(400).send({error: translator.t('categoryAmountsTooSmall')});
 
         const modifyAmountsPromises = [];
         const differencesArray = [];

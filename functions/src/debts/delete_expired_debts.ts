@@ -2,19 +2,20 @@ import admin = require('firebase-admin');
 
 const functions = require('firebase-functions');
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
         const db = admin.firestore();
 
         if (!req.body.cronKey)
-            return res.status(400).send({error: 'Fejl i anmodningen.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const callersCronKey = req.body.cronKey;
         const cronKey = functions.config().cron.key;
 
         if (callersCronKey !== cronKey)
-            res.status(422).send({error: 'Cron key matchede ikke.'});
+            res.status(422).send({error: translator.t('cronKeyMatchFailed')});
 
         let debtsRef;
         let debts;
@@ -22,7 +23,7 @@ module.exports = function (req, res) {
             debtsRef = db.collection("debts");
             debts = await debtsRef.get();
         } catch (err) {
-            res.status(422).send({error: 'Kunne ikke hente gæld.'});
+            res.status(422).send({error: translator.t('debtFetchFailed')});
         }
 
         for (const index in debts.docs) {
@@ -35,7 +36,7 @@ module.exports = function (req, res) {
                     .where("debtID", "==", debts.docs[index].id)
                     .get();
             } catch (err) {
-                res.status(422).send({error: 'Fejl opstod under gældssletningen.'});
+                res.status(422).send({error: translator.t('debtDeletionFailed')});
             }
 
             const getCategoriesPromises = [];
@@ -59,7 +60,7 @@ module.exports = function (req, res) {
                 const returnAmountsPromise = categoryDoc.ref.update({
                     amount: (categoryDoc.data().amount + categoryDebtDoc[0].data().amount)
                 }).catch(() => res.status(422)
-                    .send({error: 'Fejl opstod under gældssletningen'}));
+                    .send({error: translator.t('debtDeletionFailed')}));
 
                 promises.push(returnAmountsPromise);
                 promises.push(categoryDebtDoc[0].ref.delete());

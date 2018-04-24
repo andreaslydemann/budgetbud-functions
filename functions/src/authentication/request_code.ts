@@ -1,10 +1,11 @@
 import admin = require('firebase-admin');
 const crypto = require('crypto');
 const twilio = require('../config/twilio');
+const translator = require('../strings/translator');
 
 module.exports = async function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber)
-        return res.status(400).send({error: 'Fejl i indtastning.'});
+        return res.status(400).send({error: translator.t('errorInEntry')});
 
     const cprNumber = String(req.body.cprNumber);
     const phoneNumber = parseInt(req.body.phoneNumber);
@@ -12,7 +13,7 @@ module.exports = async function (req, res) {
     try {
         await admin.auth().getUser(cprNumber);
     } catch (err) {
-        res.status(422).send({error: 'Bruger er ikke registreret.'});
+        res.status(422).send({error: translator.t('userNotRegistered')});
     }
 
     // number between 1000 and 9999
@@ -23,9 +24,9 @@ module.exports = async function (req, res) {
         10000, 128, 'sha512').toString('hex');
 
     twilio.messages.create({
-        body: 'Din pinkode er ' + code,
-        to: '+45' + phoneNumber,
-        from: 'BudgetBud'
+        body: translator.t('codeMessage') + code,
+        to: translator.t('countryCode') + phoneNumber,
+        from: translator.t('budgetBud')
     }, async (err) => {
         if (err)
             return res.status(400).send(err);
@@ -40,7 +41,7 @@ module.exports = async function (req, res) {
                 failedSignIns: 0
             });
         } catch (err) {
-            res.status(400).send({error: 'Fejl opstod i anmodningen.'});
+            res.status(400).send({error: translator.t('errorInRequest')});
         }
 
         res.send({success: true});

@@ -2,6 +2,7 @@ import admin = require('firebase-admin');
 
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -9,11 +10,11 @@ module.exports = function (req, res) {
         try {
             await admin.auth().verifyIdToken(token);
         } catch (err) {
-            res.status(401).send({error: "Brugeren kunne ikke verificeres."})
+            res.status(401).send({error: translator.t('userNotVerified')})
         }
 
         if (!req.body.cprNumber || !req.body.code)
-            return res.status(400).send({error: 'Fejl i indtastning.'});
+            return res.status(400).send({error: translator.t('errorInRequest')});
 
         const cprNumber = String(req.body.cprNumber);
         const code = String(req.body.code);
@@ -24,11 +25,11 @@ module.exports = function (req, res) {
         try {
             userDoc = await db.collection("users").doc(cprNumber).get();
         } catch (err) {
-            res.status(401).send({error: "Fejl i hentning af brugeroplysninger."})
+            res.status(401).send({error: translator.t('userDataFetchFailed')})
         }
 
         if (!userDoc.exists)
-            return res.status(400).send({error: 'Bruger er ikke registreret.'});
+            return res.status(400).send({error: translator.t('userNotRegistered')});
 
         const hash = crypto.pbkdf2Sync(code, userDoc.data().codeSalt,
             10000, 128, 'sha512').toString('hex');
@@ -37,7 +38,7 @@ module.exports = function (req, res) {
             await userDoc.ref.update({codeHash: hash});
             res.status(200).send({success: true});
         } catch (err) {
-            res.status(401).send({error: "Ændring af pinkode fejlede."})
+            res.status(401).send({error: translator.t('codeChangeFailed')})
         }
     });
 };

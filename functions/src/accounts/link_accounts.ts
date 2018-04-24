@@ -1,6 +1,6 @@
 import admin = require('firebase-admin');
-
 const cors = require('cors')({origin: true});
+const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
@@ -8,11 +8,11 @@ module.exports = function (req, res) {
             try {
                 await admin.auth().verifyIdToken(token);
             } catch (err) {
-                res.status(401).send({error: "Brugeren kunne ikke verificeres."});
+                res.status(401).send({error: translator.t('userNotVerified')});
             }
             // Verify that the user provided an income
             if (!req.body.userID)
-                return res.status(422).send({error: 'Fejl i anmodningen.'});
+                return res.status(422).send({error: translator.t('errorInRequest')});
 
             const db = admin.firestore();
             const userID = String(req.body.userID);
@@ -27,13 +27,13 @@ module.exports = function (req, res) {
                     .where("userID", "==", userID)
                     .get();
             } catch (err) {
-                res.status(422).send({error: "Konti kunne ikke findes."})
+                res.status(422).send({error: translator.t('accountsNotFound')})
             }
 
             linkedAccounts.forEach((account) => {
                 const deleteAccountsPromise = account.ref.delete()
-                    .catch(err => res.status(422)
-                        .send({error: 'Kunne ikke slette konti.'}));
+                    .catch(() => res.status(422)
+                        .send({error: translator.t('accountsUnlinkFailed')}));
                 deleteAccountsPromises.push(deleteAccountsPromise)
             });
 
@@ -46,7 +46,7 @@ module.exports = function (req, res) {
                         userID
                     })
                         .catch(err => res.status(422)
-                            .send({error: 'Kunne ikke oprette konti.'}));
+                            .send({error: translator.t('accountsCreationFailed')}));
                     linkAccountsPromises.push(linkAccountPromise)
                 })
             }
