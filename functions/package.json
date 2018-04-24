@@ -7,7 +7,8 @@
     "shell": "npm run build && firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "unit": "jest"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -17,11 +18,15 @@
     "firebase": "^4.9.0",
     "firebase-admin": "~5.8.1",
     "firebase-functions": "^1.0.1",
+    "jest": "^22.4.3",
     "twilio": "^3.11.3"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",
     "tslint": "^5.8.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.1.3",
+    "eslint-plugin-import": "^2.2.0",
     "typescript": "^2.5.3"
   },
   "private": true
