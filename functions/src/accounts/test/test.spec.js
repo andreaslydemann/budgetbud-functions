@@ -1,9 +1,9 @@
 // You can run these unit tests by running "npm run testWithJest" inside the time-server/functions directory.
-const myFunctions = require('../index');
+const myFunctions = require('../../index');
 // const myFunctions = require('../get_linked_accounts');
 
 jest.mock('cors'); // See manual mock in ../__mocks__/cors.js
-// require('cors'); // Jest will return the mock not the real module
+require('cors'); // Jest will return the mock not the real module
 
 describe('getLinkedAccounts', () => {
 
