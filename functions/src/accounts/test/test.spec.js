@@ -1,5 +1,7 @@
 // You can run these unit tests by running "npm run testWithJest" inside the time-server/functions directory.
-const myFunctions = require('../../index');
+// const myFunctions = require('../../../lib/accounts/get_linked_accounts');
+const myFunctions = require('../index');
+const translator = require('../../strings/translator');
 // const myFunctions = require('../get_linked_accounts');
 
 jest.mock('cors'); // See manual mock in ../__mocks__/cors.js
@@ -19,7 +21,7 @@ describe('getLinkedAccounts', () => {
                 expect(code).toEqual(422);
                 return {
                     send: jest.fn(label => {
-                        expect(label).toBe('Kunne ikke hente konti.');
+                        expect(label.toString()).toContain({error: translator.t('accountsFetchFailed')});
                         done();
                     })
                 }

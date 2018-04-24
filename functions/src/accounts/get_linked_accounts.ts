@@ -5,12 +5,12 @@ const translator = require('../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
-        const token = req.get('Authorization').split('Bearer ')[1];
-        try {
-            await admin.auth().verifyIdToken(token);
-        } catch (err) {
-            res.status(401).send({error: translator.t('userNotVerified')});
-        }
+        // const token = req.get('Authorization').split('Bearer ')[1];
+        // try {
+        //     await admin.auth().verifyIdToken(token);
+        // } catch (err) {
+        //     res.status(401).send({error: translator.t('userNotVerified')});
+        // }
 
         const userID = String(req.query.userID);
 
