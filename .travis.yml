@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - "node"
+env:
+  - TEST_DIR=functions/src/accounts
+
+before_install:
+- npm install
+
+script: npm install && npm run testWithJest
