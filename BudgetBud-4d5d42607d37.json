@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "budgetbud-4950d",
+  "private_key_id": "4d5d42607d37522d171905961c818ea97ef06ad1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCxs+jlm9WdyVZa\nVDWXHhDsnTa0m3NIiDveHtXeVKIhi0i4NnF4CXQP/0xFj4sDXzB2N/EfwrAYsDz/\nwG54YxxBctD0lS4a5LV3YXYYD01zAM2EcTPeb6lrVL9agVe+a7pXopjqvBjbuprS\nWVFZRdVirJy3dwyEvAnQ5UMo9r0n75p2CtRXSmy8Cn1lAuPP/ZibdUNtAXdtOtoJ\nr4vCuEmiMjNDm4p4hscG0Pz0b5UDycNUFF++sFJ/BwyFq+f84tlBW7KIP1GPvIPu\nr3xna/9VCMGANz767V4Kl0oLUMguIbZ/3isKKvYdWtOvYkpBq2VsBwFO3EOv2MJX\n8IoEMCMHAgMBAAECggEAIVL9v+FDY/2XxgS4sAghYF3zHldwfQ+fOn5J2RHB/cxi\n7Li4+qu7KizUHs9WYGF/cwv2meAmqdqS9dseXFEpwVRIvzUimkR9i0+pl8V23rQt\n1kJsWbBS8x/Haq+Kxtjo7vo89vgjKUGLOxso2DbyVzjLgtQ+cr3YkWYM/CeZPV2v\ndlmnRHM/amgGnDDGjVfs7j36D34VKCML7oUqgtmwU4TLOrhJ+mT/7Pqv7dUPY9PR\n0Ma+CzItUg9Q0qk6NCBXOacKkVrdofiFGvbIq4xDalVnIw4erF6Dug+2Vm2cK4T8\nbzVrOvMYiz1lsXJYqN3Dc6QlaiacDawo+TUraPHlkQKBgQDYgOOpweMKdksb25hm\niibA+4lRYzl5S1IrzhrgZpvof3RWWnZ321w/0xI2ic39BsRzENyxUnVonO2i4NUl\nCwS8jbNjpfwE0NQ+naNrMNB/qZ9gOtfYYu3Mr0/OGoBraGg8tQxHUAUOa4Xtz+oG\nq62c2D2OyMVQjzx7VTKhm4CY6wKBgQDSHvTOuK3VYsvQ7kmQBGxamZIJgPeYr6Gw\n0x3VekS5Lfdr2x2PNFRZFcdr4PdjOnxNNX/xtGwPv0IjPTrPf3VPMZb5GQ60ViEn\n37FhnCefXD2l6rx5f0Tt9FluZfZtVFgIw9L2rLoO473MhrEV/BdF0b5YBZwsfLdN\nGzF1ojDXVQKBgHqkwNLYT4oMqs2UHwfvOLbXhtlA8TzhyyGfdqAp4CXblYaZZkTN\nUbuiEM4uUC8Gl2Bra+lTQclKJF/BJ1z9mehKCRXo4BPGTIVP/VPqaiH3b54ulzkw\nCW+K3BVv89FkarABC3yWOtcJV+v4fKTcudOAt5Zb61KQYX2oLK9ZjIaTAoGAXO7o\nI842xFwv/TaHPrVWHzQxDRcHa3aysvyNA3BSmPylpASDrGTesZAaZbJYeIDTnWp+\nLi84ZDaZT/Cy5DdhcSdjuMTGZih5/aLIV32zYJ5xfcK2nZ4WpJAgRd2/Alf9n9LM\nqeF3YUKFHcKs7CZVPMIpx9CjZGG8yNOwKnET3QkCgYEAkpijyyXZyAxRgs2u8rEK\nbDpZw1r8RI9ZKgz23XhiofWbNF6laO+BamHW+DO5MlfciNnyBtRSNoR3fGJiHGnd\nMrN8PtmDSqoa7ZMUsgTaK/eRXIOwtgu7CwbVP+J2oQq9oQNpy/0NmtZ6VpuJWqLw\nEqmRj7aLF2rtzi/5l6jzZAo=\n-----END PRIVATE KEY-----\n",
+  "client_email": "budgetbud-4950d@appspot.gserviceaccount.com",
+  "client_id": "107216423964757523524",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/budgetbud-4950d%40appspot.gserviceaccount.com"
+}
