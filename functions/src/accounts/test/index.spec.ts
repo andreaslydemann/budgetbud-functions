@@ -2,6 +2,8 @@ const chai = require('chai');
 const assert = chai.assert;
 const sinon = require('sinon');
 const admin = require('firebase-admin');
+import { expect } from 'chai';
+import 'mocha';
 
 describe('Cloud Functions', () => {
     let myFunctions, adminInitStub;
@@ -60,6 +62,7 @@ describe('Cloud Functions', () => {
         it('should return a 303 redirect', (done) => {
             const databaseStub = sinon.stub();
             const accountArray = ["3ohRX45YYJMfec91RNBE"];
+            let userID = 1111111111;
 
             // The following lines override the behavior of admin.database().ref('/messages')
             // .push({ original: 'input' }) to return a promise that resolves with { ref: 'new_ref' }.
