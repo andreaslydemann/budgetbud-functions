@@ -18,34 +18,6 @@ describe('Cloud Functions', () => {
         adminInitStub.restore();
     });
 
-    // describe('makeUpperCase', () => {
-    //     it('should upper case input and write it to /uppercase', () => {
-    //         const childParam = 'uppercase';
-    //         const setParam = 'INPUT';
-    //         const childStub = sinon.stub();
-    //         const setStub = sinon.stub();
-    //         // [START fakeSnap]
-    //         // The following lines creates a fake snapshot, 'snap', which returns 'input' when snap.val() is called,
-    //         // and returns true when snap.ref.parent.child('uppercase').set('INPUT') is called.
-    //         const snap = {
-    //             val: () => 'input',
-    //             ref: {
-    //                 parent: {
-    //                     child: childStub,
-    //                 }
-    //             }
-    //         };
-    //         childStub.withArgs(childParam).returns({ set: setStub });
-    //         setStub.withArgs(setParam).returns(true);
-    //         // [END fakeSnap]
-    //         // Wrap the makeUppercase function.
-    //         const wrapped = test.wrap(myFunctions.makeUppercase);
-    //         // Since we've stubbed snap.ref.parent.child(childParam).set(setParam) to return true if it was
-    //         // called with the parameters we expect, we assert that it indeed returned true.
-    //         return assert.equal(wrapped(snap), true);
-    //         // [END assertOffline]
-    //     })
-    // });
 
     describe('getLinkedAccounts', () => {
         let oldDatabase;
