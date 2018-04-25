@@ -7,4 +7,4 @@ env:
 before_install:
 - cd functions && npm install
 
-script: npm run unit
+script: npm run test
