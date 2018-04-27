@@ -1,10 +1,8 @@
 language: node_js
 node_js:
   - "node"
-env:
-  - TEST_DIR=functions/src/accounts
 
 before_install:
 - cd functions && npm install
 
-script: npm run test
+script: npm run unit
