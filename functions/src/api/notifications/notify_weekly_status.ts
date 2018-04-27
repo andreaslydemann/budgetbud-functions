@@ -6,8 +6,8 @@ const dateHelper = require('../helpers/date_helper');
 const cors = require('cors')({origin: true});
 const urls = require('../config/urls');
 const translator = require('../strings/translator');
-const accountsHelper = require('../helpers/accounts_helper');
-const notificationHelper = require('../helpers/notification_helper');
+const accountsHelper = require('../../helpers/accounts_helper');
+const notificationHelper = require('../../helpers/notification_helper');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
 
 module.exports = function (req, res) {
@@ -25,8 +25,8 @@ module.exports = function (req, res) {
         if (callersCronKey !== cronKey)
             res.status(422).send({error: translator.t('cronKeyMatchFailed')});
 
-        const budgetsWithAlarms = await db.collection("budgetAlarms").where("budgetExceeded", "==", true).get()
-            .catch(() => res.status(422).send({error: translator.t('budgetAlarmsFetchFailed')}));
+        const budgetsWithAlarms = await db.collection("budgetAlarms").where("weeklyStatus", "==", true).get()
+            .catch(() => res.status(422).send({error: translator.t('budgetAlarmsNotFound')}));
 
         budgetsWithAlarms.forEach((budget) => {
             budgetIDs.push({
@@ -44,7 +44,7 @@ module.exports = function (req, res) {
             try {
                 const {data} =
                     await axios.get(`${EBANKING_FUNCTIONS_URL}/getExpensesBetweenDates` +
-                    `?accountIDs=${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
+                        `?accountIDs=${accountIDs}&from=${dateInterval[0]}&to=${dateInterval[1]}`);
 
                 data.forEach((expense) => {
                     totalExpenseAmount += expense.amount;
@@ -53,16 +53,17 @@ module.exports = function (req, res) {
                 res.status(422).send({error: translator.t('expensesOfMonthFetchFailed')});
             }
 
-            if (totalGoalsAmount < totalExpenseAmount) {
-                const user = await db.collection("users").doc(userID).get();
-                const pushToken = user.data().pushToken;
+            const usedPercentage = Math.round((totalExpenseAmount / totalGoalsAmount) * 100);
 
-                if (pushToken) {
-                    messages.push({
-                        to: pushToken,
-                        body: translator.t('budgetExceededMessage')
-                    })
-                }
+            const user = await db.collection("users").doc(userID).get();
+            const pushToken = user.data().pushToken;
+
+            if (pushToken) {
+                messages.push({
+                    to: pushToken,
+                    body: `${translator.t('weeklyStatusMessagePart1')}${usedPercentage}` +
+                    `${translator.t('weeklyStatusMessagePart2')}`
+                })
             }
         }
 

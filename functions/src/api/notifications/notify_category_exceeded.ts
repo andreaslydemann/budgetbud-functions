@@ -3,12 +3,12 @@ import axios from 'axios';
 
 const functions = require('firebase-functions');
 const cors = require('cors')({origin: true});
-const notificationHeler = require('../helpers/notification_helper');
+const notificationHeler = require('../../helpers/notification_helper');
 const dateHelper = require('../helpers/date_helper');
 const urls = require('../config/urls');
 const translator = require('../strings/translator');
 const expenseFetcher = require('../helpers/filter_expenses');
-const accountsHelper = require('../helpers/accounts_helper');
+const accountsHelper = require('../../helpers/accounts_helper');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
 
 module.exports = function (req, res) {
