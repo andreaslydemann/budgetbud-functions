@@ -1,3 +1,4 @@
+export{};
 const cors = require('cors')({origin: true});
 const accountsHelper = require('../../helpers/accounts_helper');
 const tokenHelper = require('../helpers/id_token_helper');
