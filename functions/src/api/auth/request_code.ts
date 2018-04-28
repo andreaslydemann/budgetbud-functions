@@ -1,7 +1,7 @@
 import admin = require('firebase-admin');
 const crypto = require('crypto');
-const twilio = require('../config/twilio');
-const translator = require('../strings/translator');
+const twilio = require('../../config/twilio/twilio');
+const translator = require('../../strings/translator');
 
 module.exports = async function (req, res) {
     if (!req.body.cprNumber || !req.body.phoneNumber)

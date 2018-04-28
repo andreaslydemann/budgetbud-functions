@@ -8,7 +8,6 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "unit": "jest",
     "test": "jest"
   },
   "main": "lib/index.js",
@@ -19,25 +18,18 @@
     "firebase": "^4.13.1",
     "firebase-admin": "~5.8.1",
     "firebase-functions": "^1.0.1",
-    "sinon": "^4.5.0",
     "twilio": "^3.15.1",
     "typescript-tools": "^0.3.1"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.3",
     "@types/expect": "^1.20.3",
     "@types/jest": "^22.2.3",
     "babel-jest": "22.4.0",
-    "chai": "^4.1.2",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^11.1.3",
-    "eslint-plugin-import": "^2.2.0",
     "firebase-mock": "^2.2.2",
     "jest": "^22.4.3",
     "jest-expo": "^25.1.0",
     "rimraf": "^2.6.2",
     "ts-jest": "^22.4.4",
-    "ts-mocha": "^1.2.0",
     "ts-node": "^6.0.0",
     "tslint": "^5.8.0",
     "typescript": "^2.8.3"

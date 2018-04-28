@@ -1,5 +1,5 @@
 import admin = require('firebase-admin');
-const translator = require('../strings/translator');
+const translator = require('../../strings/translator');
 
 module.exports = function (req, res) {
     if (!req.body.cprNumber)

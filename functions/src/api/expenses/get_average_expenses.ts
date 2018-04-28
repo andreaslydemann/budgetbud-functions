@@ -1,21 +1,16 @@
-import admin = require('firebase-admin');
 import axios from 'axios';
-const dateHelper = require('../helpers/date_helper');
-const urls = require('../config/urls');
-const expenseFetcher = require('../helpers/filter_expenses');
-const accountsHelper = require('../helpers/accounts_helper');
-const translator = require('../strings/translator');
+const dateHelper = require('../../helpers/date_helper');
+const urls = require('../../strings/urls');
+const expenseFetcher = require('../../helpers/filter_helper');
+const accountsHelper = require('../../helpers/accounts_helper');
+const translator = require('../../strings/translator');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;
 const cors = require('cors')({origin: true});
+const tokenHelper = require('../../helpers/id_token_helper');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
-        const token = req.get('Authorization').split('Bearer ')[1];
-        try {
-            await admin.auth().verifyIdToken(token);
-        } catch (err) {
-            res.status(401).send({error: translator.t('userNotVerified')});
-        }
+        await tokenHelper.verifyToken(req, res);
 
         if (!req.query.userID)
             return res.status(400).send({error: translator.t('errorInRequest')});

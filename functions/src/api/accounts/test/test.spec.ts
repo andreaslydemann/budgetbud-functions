@@ -30,7 +30,7 @@ describe('getLinkedAccounts', () => {
     });
 
     test('returns a 422 for not finding accounts', done => {
-        const mockTokenHelper = tokenHelper.verifyToken = jest.fn(() => {})
+        const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
 
         const mockRequest = {
@@ -55,11 +55,10 @@ describe('getLinkedAccounts', () => {
 
     test('returns a 200 with an array of accounts', async done => {
         const testArray = ["3ohRX45YYJMfec91RNBE"];
-        const mockTokenHelper = tokenHelper.verifyToken = jest.fn(() => {})
+        const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
 
-        const mockAccountsArray = accountHelper.getLinkedAccounts = jest.fn(() => {
-        })
+        const mockAccountsArray = accountHelper.getLinkedAccounts = jest.fn();
 
         mockAccountsArray.mockResolvedValue(testArray);
 

@@ -2,10 +2,10 @@ import admin = require('firebase-admin');
 import axios from 'axios';
 
 const functions = require('firebase-functions');
-const dateHelper = require('../helpers/date_helper');
+const dateHelper = require('../../helpers/date_helper');
 const cors = require('cors')({origin: true});
-const urls = require('../config/urls');
-const translator = require('../strings/translator');
+const urls = require('../../strings/urls');
+const translator = require('../../strings/translator');
 const accountsHelper = require('../../helpers/accounts_helper');
 const notificationHelper = require('../../helpers/notification_helper');
 const EBANKING_FUNCTIONS_URL = urls.EBANKING_FUNCTIONS_URL;

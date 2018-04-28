@@ -1,12 +1,12 @@
+export{};
 const cors = require('cors')({origin: true});
 const accountsHelper = require('../../helpers/accounts_helper');
-const tokenHelper = require('../helpers/id_token_helper');
-const translator = require('../strings/translator');
+const tokenHelper = require('../../helpers/id_token_helper');
+const translator = require('../../strings/translator');
 
 module.exports = async function (req, res) {
     cors(req, res, async () => {
         await tokenHelper.verifyToken(req, res);
-
         const userID = String(req.query.userID);
 
         try {

@@ -1,16 +1,12 @@
 import admin = require('firebase-admin');
 
 const cors = require('cors')({origin: true});
-const translator = require('../strings/translator');
+const translator = require('../../strings/translator');
+const tokenHelper = require('../../helpers/id_token_helper');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
-        const token = req.get('Authorization').split('Bearer ')[1];
-        try {
-            await admin.auth().verifyIdToken(token);
-        } catch (err) {
-            res.status(401).send({error: translator.t('userNotVerified')});
-        }
+        await tokenHelper.verifyToken(req, res);
 
         // Verify that the user provided an income and userID
         if (!req.body.income || !req.body.userID)

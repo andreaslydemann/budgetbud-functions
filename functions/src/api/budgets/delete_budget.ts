@@ -1,16 +1,11 @@
 import admin = require('firebase-admin');
-
 const cors = require('cors')({origin: true});
-const translator = require('../strings/translator');
+const translator = require('../../strings/translator');
+const tokenHelper = require('../../helpers/id_token_helper');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {
-        const token = req.get('Authorization').split('Bearer ')[1];
-        try {
-            await admin.auth().verifyIdToken(token);
-        } catch (err) {
-            res.status(401).send({error: translator.t('userNotVerified')});
-        }
+        await tokenHelper.verifyToken(req, res);
 
         if (!req.body.budgetID)
             return res.status(400).send({error: translator.t('noBudgetID')});
@@ -20,6 +15,7 @@ module.exports = function (req, res) {
         const db = admin.firestore();
         const budgetRef = db.collection('budgets').doc(budgetID);
 
+        //Delete budget
         let budgetDoc;
         try {
             budgetDoc = await budgetRef.get()
@@ -37,12 +33,34 @@ module.exports = function (req, res) {
             res.status(422).send({error: translator.t('budgetDeletionFailed')});
         }
 
-        const querySnapshot = await db.collection("categories").where("budgetID", "==", budgetID).get();
         const deletionPromises = [];
 
-        querySnapshot.forEach(doc => {
-            const deletionPromise = doc.ref.delete();
-            deletionPromises.push(deletionPromise);
+        //Delete categories
+        const categoriesSnapshot = await db.collection("categories").where("budgetID", "==", budgetID).get();
+        categoriesSnapshot.forEach(doc => {
+            const categoriesDeletionPromise = doc.ref.delete();
+            deletionPromises.push(categoriesDeletionPromise);
+        });
+
+        //Delete debt
+        const debtsSnapshot = await db.collection("debts").where("budgetID", "==", budgetID).get();
+        debtsSnapshot.forEach(doc => {
+            const debtsDeletionPromise = doc.ref.delete();
+            deletionPromises.push(debtsDeletionPromise);
+        });
+
+        //Delete category alarms
+        const categoryAlarmsSnapshot = await db.collection("categoryAlarms").where("budgetID", "==", budgetID).get();
+        categoryAlarmsSnapshot.forEach(doc => {
+            const categoryAlarmsDeletionPromise = doc.ref.delete();
+            deletionPromises.push(categoryAlarmsDeletionPromise);
+        });
+
+        //Delete budget alarms
+        const budgetAlarmsSnapshot = await db.collection("budgetAlarms").where("budgetID", "==", budgetID).get();
+        budgetAlarmsSnapshot.forEach(doc => {
+            const categoryAlarmsDeletionPromise = doc.ref.delete();
+            deletionPromises.push(categoryAlarmsDeletionPromise);
         });
 
         await Promise.all(deletionPromises);

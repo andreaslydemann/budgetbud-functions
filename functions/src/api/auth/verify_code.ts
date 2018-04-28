@@ -1,6 +1,6 @@
 import admin = require('firebase-admin');
 const crypto = require('crypto');
-const translator = require('../strings/translator');
+const translator = require('../../strings/translator');
 
 module.exports = async function (req, res) {
     if (!req.body.cprNumber || !req.body.code)

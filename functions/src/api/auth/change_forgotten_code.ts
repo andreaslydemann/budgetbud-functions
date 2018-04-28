@@ -1,7 +1,7 @@
 import admin = require('firebase-admin');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
-const translator = require('../strings/translator');
+const translator = require('../../strings/translator');
 
 module.exports = function (req, res) {
     cors(req, res, async () => {

@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const serviceAccount = require('./config/service_account');
+const serviceAccount = require('./config/firebase/service_account');
 
 const {
     getLinkedAccounts,
