@@ -5,14 +5,14 @@ const serviceAccount = require('./config/service_account');
 const {
     getLinkedAccounts,
     linkAccounts
-} = require('./accounts');
+} = require('./api/accounts');
 const {
     getBudgetAlarms,
     getCategoryAlarms,
     resetAlarms,
     toggleBudgetAlarms,
     toggleCategoryAlarm
-} = require('./alarms');
+} = require('./api/alarms');
 const {
     changeCode,
     changeForgottenCode,
@@ -24,21 +24,21 @@ const {
     requestCode,
     verifyActivationCode,
     verifyCode
-} = require('./authentication');
+} = require('./api/auth');
 const {
     createBudget,
     deleteBudget,
     editBudget,
     getBudget,
     getBudgetID
-} = require('./budgets');
+} = require('./api/budgets');
 const {
     createCategories,
     editCategories,
     getCategories,
     getCategoriesOfDebt,
     getCategoryTypes
-} = require('./categories');
+} = require('./api/categories');
 const {
     calculateDebtCategorySubtractions,
     createDebt,
@@ -46,21 +46,21 @@ const {
     deleteExpiredDebts,
     editDebt,
     getDebts
-} = require('./debts');
+} = require('./api/debts');
 const {
     calculateDisposableCategoryDifferences,
     editDisposable
-} = require('./disposable');
+} = require('./api/disposable');
 const {
     getAverageExpenses,
     getExpensesOfMonth
-} = require('./expenses');
+} = require('./api/expenses');
 const {
     addPushToken,
     notifyBudgetExceeded,
     notifyCategoryExceeded,
     notifyWeeklyStatus
-} = require('./notifications');
+} = require('./api/notifications');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

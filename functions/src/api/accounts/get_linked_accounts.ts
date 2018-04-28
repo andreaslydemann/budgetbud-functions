@@ -1,16 +1,11 @@
-import admin = require('firebase-admin');
 const cors = require('cors')({origin: true});
-const accountsHelper = require('../helpers/accounts_helper');
+const accountsHelper = require('../../helpers/accounts_helper');
+const tokenHelper = require('../helpers/id_token_helper');
 const translator = require('../strings/translator');
 
-module.exports = function (req, res) {
+module.exports = async function (req, res) {
     cors(req, res, async () => {
-        const token = req.get('Authorization').split('Bearer ')[1];
-        try {
-            await admin.auth().verifyIdToken(token);
-        } catch (err) {
-            res.status(401).send({error: translator.t('userNotVerified')});
-        }
+        await tokenHelper.verifyToken(req, res);
 
         const userID = String(req.query.userID);
 
