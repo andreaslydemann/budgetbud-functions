@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 const translator = require('../../strings/translator');
 const tokenHelper = require('../../helpers/id_token_helper');
@@ -44,10 +45,22 @@ module.exports = function (req, res) {
 
         //Delete debt
         const debtsSnapshot = await db.collection("debts").where("budgetID", "==", budgetID).get();
-        debtsSnapshot.forEach(doc => {
-            const debtsDeletionPromise = doc.ref.delete();
+        for (const debtIndex in debtsSnapshot.docs) {
+            const debt = debtsSnapshot.docs[debtIndex];
+
+            const categoryDebts = await db.collection("categoryDebts")
+                .where("debtID", "==", debt.id)
+                .get();
+
+            console.log(categoryDebts);
+
+            categoryDebts.forEach(categoryDebtDoc => {
+                deletionPromises.push(categoryDebtDoc.ref.delete());
+            });
+
+            const debtsDeletionPromise = debt.ref.delete();
             deletionPromises.push(debtsDeletionPromise);
-        });
+        }
 
         //Delete category alarms
         const categoryAlarmsSnapshot = await db.collection("categoryAlarms").where("budgetID", "==", budgetID).get();

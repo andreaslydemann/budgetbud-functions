@@ -28,10 +28,14 @@ module.exports = function (req, res) {
         const budgetsWithAlarms = await db.collection("budgetAlarms").where("budgetExceeded", "==", true).get()
             .catch(() => res.status(422).send({error: translator.t('budgetAlarmsFetchFailed')}));
 
-        budgetsWithAlarms.forEach((budget) => {
-            budgetIDs.push({
-                budgetID: budget.data().budgetID,
-            })
+
+        budgetsWithAlarms.forEach((budgetAlarm) => {
+            if (budgetAlarm.data().hasTriggered === false) {
+                budgetIDs.push({
+                    budgetID: budgetAlarm.data().budgetID,
+                    alarmID: budgetAlarm.id
+                })
+            }
         });
 
         for (const budget of budgetIDs) {
@@ -54,6 +58,11 @@ module.exports = function (req, res) {
             }
 
             if (totalGoalsAmount < totalExpenseAmount) {
+                await db.collection("budgetAlarms").doc(budget.alarmID).update({
+                    hasTriggered: true
+                }).catch(() => res.status(422)
+                    .send({error: translator.t('budgetExceededFail')}));
+
                 const user = await db.collection("users").doc(userID).get();
                 const pushToken = user.data().pushToken;
 

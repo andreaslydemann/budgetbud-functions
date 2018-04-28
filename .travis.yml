@@ -8,4 +8,4 @@ before_script:
 
 script:
 - ng build
-- npm run unit
+- npm run test

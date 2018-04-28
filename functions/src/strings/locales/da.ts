@@ -38,6 +38,8 @@ module.exports.responses = {
     debtCreationFailed: 'Gæld kunne ikke oprettes.',
     debtNotFound: 'Gæld blev ikke fundet.',
     debtDeletionFailed: 'Sletning af gæld fejlede.',
+    budgetExceededFail: 'Kunne ikke opdatere budgetalarm',
+    categoryExceededFail: 'Kunne ikke opdatere kategoryalarm',
     debtFetchFailed: 'Hentning af gæld fejlede.',
     debtUpdateFailed: 'Kunne ikke ændre gæld.',
     disposableUpdateFailed: 'Ændring af rådighedsbeløb fejlede.',

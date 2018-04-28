@@ -56,6 +56,7 @@ module.exports = function (req, res) {
 
             for (const alarmIndex in categoryAlarms.docs) {
                 const alarm = categoryAlarms.docs[alarmIndex];
+                if(alarm.data().hasTriggered === true) continue;
 
                 const category = await db.collection("categories").doc(alarm.data().categoryID).get();
                 const expenseIndex = filteredExpenses.findIndex
@@ -69,6 +70,11 @@ module.exports = function (req, res) {
                 const pushToken = user.data().pushToken;
                 const nameIndex = categoryTypeArray.findIndex(x => x.id === category.data().categoryTypeID);
                 const name = categoryTypeArray[nameIndex].name;
+
+                await db.collection("categoryAlarms").doc(alarm.id).update({
+                    hasTriggered: true
+                }).catch(() => res.status(422)
+                    .send({error: translator.t('categoryExceededFail')}));
 
                 if (pushToken) {
                     messages.push({
