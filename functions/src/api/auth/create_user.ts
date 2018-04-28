@@ -10,5 +10,5 @@ module.exports = function (req, res) {
 
     admin.auth().createUser({uid: cprNumber})
         .then(user => res.send(user))
-        .catch(err => res.status(422).send({error: translator.t('userAlreadyRegistered')}));
+        .catch(() => res.status(422).send({error: translator.t('userAlreadyRegistered')}));
 };
