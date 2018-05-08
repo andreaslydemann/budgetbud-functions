@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+
 const cors = require('cors')({origin: true});
 const translator = require('../../strings/translator');
 const tokenHelper = require('../../helpers/id_token_helper');
@@ -22,24 +23,22 @@ module.exports = function (req, res) {
         categories.forEach(categoryDoc => {
             const categoryTypeID = String(categoryDoc.categoryTypeID);
             const categoryAmount = parseInt(categoryDoc.amount);
-            if (categoryAmount > 0) {
-                if(categoryDoc.categoryID) {
-                    editPromise = categoriesCollection.doc(categoryDoc.categoryID).update({
-                        amount: categoryAmount
-                    })
-                        .catch(() => res.status(422)
-                            .send({error: translator.t('categoryUpdateFailed')}));
-                } else {
-                    editPromise = categoriesCollection.doc().set({
-                        amount: categoryAmount,
-                        budgetID,
-                        categoryTypeID
-                    })
-                        .catch(() => res.status(422)
-                            .send({error: translator.t('categoryUpdateFailed')}));
-                }
-                editPromises.push(editPromise);
+            if (categoryDoc.categoryID) {
+                editPromise = categoriesCollection.doc(categoryDoc.categoryID).update({
+                    amount: categoryAmount
+                })
+                    .catch(() => res.status(422)
+                        .send({error: translator.t('categoryUpdateFailed')}));
+            } else {
+                editPromise = categoriesCollection.doc().set({
+                    amount: categoryAmount,
+                    budgetID,
+                    categoryTypeID
+                })
+                    .catch(() => res.status(422)
+                        .send({error: translator.t('categoryUpdateFailed')}));
             }
+            editPromises.push(editPromise);
         });
 
         await Promise.all(editPromises);

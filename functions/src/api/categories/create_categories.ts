@@ -16,19 +16,23 @@ module.exports = function (req, res) {
         const categories = req.body.categories;
         const budgetID = String(req.body.budgetID);
 
+        const createPromises = [];
         categories.forEach(categoryDoc => {
             const categoryTypeID = String(categoryDoc.categoryTypeID);
             const categoryAmount = parseInt(categoryDoc.amount);
             if (categoryAmount > 0) {
-                db.collection('categories').doc().set({
+                const createPromise = db.collection('categories').doc().set({
                     categoryTypeID,
                     amount: categoryAmount,
                     budgetID
-                })
-                    .then(() => res.status(200).send({success: true}))
-                    .catch(err => res.status(422)
+                }).catch(err => res.status(422)
                         .send({error: translator.t('categoryCreationFailed')}));
+
+                createPromises.push(createPromise);
             }
         });
+
+        await Promise.all(createPromises);
+        res.status(200).send({success: true});
     })
 };

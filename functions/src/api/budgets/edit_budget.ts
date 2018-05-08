@@ -1,4 +1,5 @@
 import admin = require('firebase-admin');
+import {isUndefined} from "util";
 
 const cors = require('cors')({origin: true});
 const translator = require('../../strings/translator');
@@ -9,9 +10,9 @@ module.exports = function (req, res) {
         await tokenHelper.verifyToken(req, res);
 
         // Verify that the user provided data
-        if (!req.body.income ||
-            !req.body.disposable ||
-            !req.body.totalGoalsAmount)
+        if (isUndefined(req.body.income) ||
+            isUndefined(req.body.disposable) ||
+            isUndefined(req.body.totalGoalsAmount))
             return res.status(422).send({error: translator.t('errorInRequest')});
 
         const db = admin.firestore();
