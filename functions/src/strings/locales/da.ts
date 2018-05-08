@@ -44,6 +44,7 @@ module.exports.responses = {
     debtUpdateFailed: 'Kunne ikke ændre gæld.',
     disposableUpdateFailed: 'Ændring af rådighedsbeløb fejlede.',
     errorInRequest: 'Fejl i anmodningen.',
+    noBudgetCreated: 'Du mangler at oprette et budget',
     errorInEntry: 'Fejl i indtastning.',
     errorInUserDeletion: 'Fejl opstod under brugersletning.',
     expensesOfMonthFetchFailed: 'Kunne ikke hente månedens udgifter.',

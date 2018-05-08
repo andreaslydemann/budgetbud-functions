@@ -8,7 +8,7 @@ module.exports = function (req, res) {
         await tokenHelper.verifyToken(req, res);
 
         if (!req.query.budgetID)
-            return res.status(400).send({error: translator.t('errorInRequest')});
+            return res.status(400).send();
 
         const budgetID = String(req.query.budgetID);
         const db = admin.firestore();
