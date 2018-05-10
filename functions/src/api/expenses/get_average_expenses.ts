@@ -20,7 +20,7 @@ module.exports = function (req, res) {
         const dateInterval = dateHelper.threeMonthInterval();
 
         try {
-            accountIDs = await accountsHelper.getLinkedAccounts(userID);
+            accountIDs = await accountsHelper.getLinkedAccounts(res, userID);
         } catch (err) {
             res.status(422).send({error: translator.t('accountsFetchFailed')});
         }

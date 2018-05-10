@@ -1,5 +1,5 @@
 module.exports.responses = {
-    accountsFetchFailed: 'Kunne ikke hente konti.',
+    accountsFetchFailed: 'Kunne ikke hente forbrug.',
     accountsNotFound: 'Kunne ikke finde konti.',
     accountsUnlinkFailed: 'Kunne ikke frakoble konti.',
     accountsCreationFailed: 'Kunne ikke oprette konti.',
@@ -49,6 +49,7 @@ module.exports.responses = {
     errorInUserDeletion: 'Fejl opstod under brugersletning.',
     expensesOfMonthFetchFailed: 'Kunne ikke hente månedens udgifter.',
     expirationDateInvalid: 'Ugyldig udløbsdato.',
+    noLinkedAccounts: 'Ingen tilkoblede konti fundet.',
     noBudgetID: 'Intet budgetID angivet.',
     noCategoriesSelected: 'Ingen kategorier valgt.',
     noDebtSelected: 'Intet gæld er angivet.',

@@ -21,7 +21,7 @@ module.exports = function (req, res) {
         let accountIDs;
 
         try {
-            accountIDs = await accountsHelper.getLinkedAccounts(userID);
+            accountIDs = await accountsHelper.getLinkedAccounts(res, userID);
         } catch (err) {
             res.status(422).send({error: translator.t('accountsFetchFailed')});
         }
