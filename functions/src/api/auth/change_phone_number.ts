@@ -7,7 +7,7 @@ module.exports = function (req, res) {
     cors(req, res, async () => {
         await tokenHelper.verifyToken(req, res);
 
-        if (!req.body.cprNumber || !req.body.cprNumber)
+        if (!req.body.cprNumber || !req.body.phoneNumber)
             return res.status(400).send({error: translator.t('errorInEntry')});
 
         const cprNumber = String(req.body.cprNumber);
