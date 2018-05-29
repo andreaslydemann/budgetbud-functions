@@ -3,11 +3,38 @@ export {};
 const myFunctions = require('../index');
 const accountHelper = require('../../../helpers/accounts_helper');
 const tokenHelper = require('../../../helpers/id_token_helper');
+const translator = require('../../../strings/translator');
+const fakeDatabase = require('firebase-mock-functions');
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const db = new fakeDatabase(functions, admin);
+db.override();
+db.database.autoFlush(true);
+
+const {
+    AdminRoot,
+} = require('firebase-admin-mock');
 
 jest.mock('cors'); // See manual mock in ../__mocks__/cors.js
 require('cors'); // Jest will return the mock not the real module
 
 describe('getBudgetAlarms', () => {
+    let admin;
+    beforeEach(() => {
+        admin = new AdminRoot();
+        admin.initializeApp({databaseUrl: "123"});
+        admin.firestore = jest.fn();
+        jest.spyOn(admin, 'firestore').mockImplementation(() => {
+            return {
+                collection: (path) => {
+                    return {
+                        get: () => ["test1", "test2"]
+                    }
+                }
+            }
+        });
+    });
+
     test('returns a 422 for not finding alarms', async done => {
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
@@ -34,14 +61,6 @@ describe('getBudgetAlarms', () => {
     test('returns a 200 with an array of alarms', async done => {
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
-
-        const collection = jest.fn();
-        admin.firestore = jest.fn();
-        jest.spyOn(admin, 'firestore').mockImplementation(() => {
-            return {
-                collection
-            }
-        });
 
         const mockAccountsArray = accountHelper.getLinkedAccounts = jest.fn();
 

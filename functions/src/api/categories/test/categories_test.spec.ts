@@ -7,13 +7,35 @@ const tokenHelper = require('../../../helpers/id_token_helper');
 jest.mock('cors'); // See manual mock in ../__mocks__/cors.js
 require('cors'); // Jest will return the mock not the real module
 
-describe('deleteUser', () => {
+describe('getCategories', () => {
+    let admin;
     beforeEach(async () => {
         mockFirebase();
     });
-    test('returns a 200 for for successful deletion', done => {
+
+    test('returns a 200 code and the expected return value', done => {
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
+        const objAccepted = {id: 1, data: {amount: 25, name: "test1"}};
+        const objDenied = {id: 0, data: {amount: 0, name: "test2"}};
+
+        const returnVal = {
+            data: [
+                objAccepted,
+                objDenied
+            ]
+        };
+
+        admin.firestore = jest.fn();
+        jest.spyOn(admin, 'firestore').mockImplementation(() => {
+            return {
+                collection: (path) => {
+                    return {
+                        get: () => returnVal
+                    }
+                }
+            }
+        });
 
         const mockRequest = {
             method: 'POST',
@@ -24,39 +46,18 @@ describe('deleteUser', () => {
             status: (code) => {
                 expect(code).toEqual(200);
                 return {
-                    send: jest.fn(() => {
+                    send: jest.fn(actualReturn => {
+                        expect(actualReturn).toBe(objAccepted);
                         done();
                     })
                 }
             }
         };
-        myFunctions.deleteUser(mockRequest, mockResponse);
-    });
-
-    test('returns a 400 for not granting a cpr number', done => {
-        const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
-        mockTokenHelper.mockReturnValueOnce('');
-
-        const mockRequest = {
-            method: 'POST',
-        };
-        const mockResponse = {
-            status: (code) => {
-                expect(code).toEqual(400);
-                return {
-                    send: jest.fn(label => {
-                        expect(label.toString()).toContain({error: translator.t('cprNumberNotReceived')});
-                        done();
-                    })
-                }
-            }
-        };
-
-        myFunctions.deleteUser(mockRequest, mockResponse);
+        myFunctions.getCategories(mockRequest, mockResponse);
     });
 });
 
-describe('createUser', () => {
+describe('createCategories', () => {
     beforeEach(async () => {
         mockFirebase();
     });
@@ -64,9 +65,15 @@ describe('createUser', () => {
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
 
+        const objAccepted = {categoryTypeID: 1, amount: 25};
+        const objDenied = {categoryTypeID: 0, amount: 0};
+
         const mockRequest = {
             method: 'POST',
-            body: {cprNumber: '4564564564'}
+            body: {
+                categories: [objAccepted, objDenied],
+                budgetID: 123
+            }
         };
 
         const mockResponse = {
@@ -79,6 +86,6 @@ describe('createUser', () => {
                 }
             }
         };
-        myFunctions.createUser(mockRequest, mockResponse);
+        myFunctions.createCategories(mockRequest, mockResponse);
     });
 });

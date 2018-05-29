@@ -25,7 +25,6 @@ module.exports = function (req, res) {
         }
 
         const debtArray = [];
-
         querySnapshot.forEach((doc) => {
             const data = doc.data();
 

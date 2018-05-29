@@ -9,8 +9,10 @@ module.exports = function (req, res) {
             await tokenHelper.verifyToken(req, res);
 
             // Verify that the user provided an income
-            if (!req.body.userID)
+            if (!req.body.userID) {
+                console.log("test: " + req.body.userID)
                 return res.status(422).send({error: translator.t('errorInRequest')});
+            }
 
             const db = admin.firestore();
             const userID = String(req.body.userID);

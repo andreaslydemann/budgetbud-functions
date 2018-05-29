@@ -7,19 +7,9 @@ const tokenHelper = require('../../../helpers/id_token_helper');
 
 jest.mock('cors'); // See manual mock in ../__mocks__/cors.js
 require('cors'); // Jest will return the mock not the real module
-const fakeDatabase = require('firebase-mock-functions');
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const db = new fakeDatabase(functions, admin);
-db.override();
-db.database.autoFlush(true);
-
-const {
-    AdminRoot,
-} = require('firebase-admin-mock');
 
 describe('getLinkedAccounts', () => {
-    test('1 - returns a 401 for GET calls without token', done => {
+    test('returns a 401 for GET calls without token', done => {
         const mockRequest = {
             method: 'GET',
             query: {userID: '1111111111'}
@@ -46,7 +36,7 @@ describe('getLinkedAccounts', () => {
         myFunctions.getLinkedAccounts(mockRequest, mockResponse);
     });
 
-    test('2 - returns a 422 for not finding accounts', done => {
+    test('returns a 422 for not finding accounts', done => {
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
 
@@ -67,11 +57,10 @@ describe('getLinkedAccounts', () => {
                 }
             }
         };
-
         myFunctions.getLinkedAccounts(mockRequest, mockResponse);
     });
 
-    test('3 - returns a 200 with an array of accounts', async done => {
+    test('returns a 200 with an array of accounts', async done => {
         const testArray = ["3ohRX45YYJMfec91RNBE"];
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
@@ -102,23 +91,11 @@ describe('getLinkedAccounts', () => {
 });
 
 describe('link_accounts', () => {
-    let admin;
-    beforeEach(() => {
-        admin = new AdminRoot();
-        admin.initializeApp({databaseUrl: "123"});
-        admin.firestore = jest.fn();
-        jest.spyOn(admin, 'firestore').mockImplementation(() => {
-            return {
-                collection: (path) => {
-                    return {
-                        get: () => ["test1", "test2"]
-                    }
-                }
-            }
-        });
+    beforeEach(async () => {
+        mockFirebase();
     });
 
-    test('4 - returns a 422 for not finding accounts', done => {
+    test('returns a 422 for not finding accounts', done => {
         const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
         mockTokenHelper.mockReturnValueOnce('');
 
@@ -141,32 +118,17 @@ describe('link_accounts', () => {
         myFunctions.linkAccounts(mockRequest, mockResponse);
     });
 
-    test('5 - returns a 200 with an array of accounts', async done => {
-        const testArray = ["3ohRX45YYJMfec91RNBE"];
-        const mockTokenHelper = tokenHelper.verifyToken = jest.fn();
-        mockTokenHelper.mockReturnValueOnce('');
-
-        const mockAccountsArray = accountHelper.getLinkedAccounts = jest.fn();
-        mockAccountsArray.mockResolvedValue(testArray);
-
+    test('returns a 200 with an array of accounts', async done => {
         const mockRequest = {
             method: 'GET',
             body: {userID: "123"}
         };
 
-        mockRequest.body = jest.fn();
-        jest.spyOn(mockRequest, 'body').mockImplementation(() => {
-            return {
-                userID: () => ["123"]
-            }
-        });
-
         const mockResponse = {
             status: (code) => {
                 expect(code).toEqual(200);
                 return {
-                    send: jest.fn(array => {
-                        expect(array).toBe(testArray);
+                    send: jest.fn( () => {
                         done();
                     })
                 }
