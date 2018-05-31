@@ -1,11 +1,10 @@
 export {};
-// You can run these unit tests by running "npm run testWithJest" inside the time-server/functions directory.
 const myFunctions = require('../index');
 const translator = require('../../../strings/translator');
 const tokenHelper = require('../../../helpers/id_token_helper');
 
-jest.mock('cors'); // See manual mock in ../__mocks__/cors.js
-require('cors'); // Jest will return the mock not the real module
+jest.mock('cors');
+require('cors');
 
 describe('deleteUser', () => {
     beforeEach(async () => {

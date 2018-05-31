@@ -11,7 +11,6 @@ jest.mock('axios');
 require('axios');
 
 describe('getAverageExpenses', () => {
-    let admin;
     beforeEach(async () => {
         mockFirebase();
     });
